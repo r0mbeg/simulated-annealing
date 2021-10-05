@@ -5,11 +5,14 @@ function getRandomInt(max) {
 }
 
 function travelTime(crawlPath, adjacencyMatrix) {
+    let str = "";
     let sum = 0;
     for (let i = 0; i < crawlPath.length - 1; i++) {
         sum += adjacencyMatrix[crawlPath[i]][crawlPath[i + 1]];
+        str = str + " + " + adjacencyMatrix[crawlPath[i]][crawlPath[i + 1]];
         
     }
+    console.log(str);
     return sum;
     //console.log(sum);
 }
