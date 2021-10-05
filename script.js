@@ -37,7 +37,7 @@ function shuffleArray(array) {
 
 
 function probability(deltaLengthPath, temperature) {
-    return (100 * Math.exp(-deltaLengthPath / temperature));
+    return (100 * Math.exp(- (deltaLengthPath / temperature)));
 }
 
 let adjacencyMatrix = [[0, 3, 4, 1, 2, 1],
@@ -65,7 +65,7 @@ for (let i = 0; i < adjacencyMatrix.length; i++) {
 
 
 //стартовый путь
-crawlPath[0] = shuffleArray(tempPath);
+crawlPath[0] = tempPath;//shuffleArray(tempPath);
 lengthPath[0] = travelTime(crawlPath[0], adjacencyMatrix);
 let min = lengthPath[0];
 let minNumber = 0;
@@ -75,24 +75,23 @@ console.log("Стартовый путь: " + crawlPath[0] + " имеет дли
 
 
 //начальная температура
-let temperature = 100;
+let temperature = 1000;
 
 //коэффициент снижения температуры
-let alpha = 0.8;
+let alpha = 0.9;
 
 //разница длин путей
 let deltaLengthPath = [];
 
 //вероятность для выбора пути
-//let probability;
-
 let P = 0;
 
-let i = 1;
+let i = 1   ;
 
+let testP = Math.random() * 100;
 
 while (temperature >= 1) {
-    //console.log("Текущая температура: " + temperature);
+    console.log("Текущая температура: " + temperature);
     //новый путь обхода
     crawlPath[i] = shuffleArray(crawlPath[i - 1]);
     //длина нового пути обхода
@@ -104,9 +103,11 @@ while (temperature >= 1) {
 
     //вычисление вероятности для выбора пути
     P = probability(deltaLengthPath[i], temperature);
-
+    console.log("Величина P* равна " + P);
+    
     //если P больше случайного числа от 0 до 100, выбираем этот путь
-    let testP = Math.random() * 100;
+    testP = Math.random() * 100;
+    console.log("Величина testP равна " + testP);
     //console.log("Случайное число для сравнения с P* = " + testP);
     if (P > testP) {
         if (lengthPath[i] < min) {
@@ -127,7 +128,6 @@ while (temperature >= 1) {
 
 console.log("Итоговый путь: " + crawlPath[crawlPath.length - 1] + " имеет длину " + lengthPath[crawlPath.length - 1] + " достигнут на итерации " + (crawlPath.length - 1));
 console.log("Лучший путь: " + crawlPath[minNumber] + " имеет длину " + lengthPath[minNumber] + " достигнут на итерации " + minNumber);
-
-
+//настоящее решение - 5
 
 
