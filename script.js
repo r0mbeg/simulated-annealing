@@ -18,22 +18,18 @@ function swapTwoRandom(crawlPath) {
     let x = getRandomInt(crawlPath.length);
     let y = getRandomInt(crawlPath.length);
     while (x == y) {
-        console.log("Числа получились равные!");
         y = getRandomInt(crawlPath.length);
     }
-    console.log(x + " " + y);
+    //console.log(x + " " + y);
     let temp = crawlPath[x];
     crawlPath[x] = crawlPath[y];
     crawlPath[y] = temp;
-    //console.log(crawlPath);
 }
 
 function shuffleArray(array) {
     let res = array;
-    //console.log(array.length);
     for (let i = 0; i < array.length * 3; i++) {
         swapTwoRandom(res);
-        console.log("Итерация свапа " + i);
     }
     return res;
 }
@@ -71,16 +67,18 @@ for (let i = 0; i < adjacencyMatrix.length; i++) {
 //стартовый путь
 crawlPath[0] = shuffleArray(tempPath);
 lengthPath[0] = travelTime(crawlPath[0], adjacencyMatrix);
+let min = lengthPath[0];
+let minNumber = 0;
 
-console.log(crawlPath[0]);
-console.log(lengthPath[0]);
+console.log("Стартовый путь: " + crawlPath[0] + " имеет длину " + lengthPath[0]);
+
 
 
 //начальная температура
 let temperature = 100;
 
 //коэффициент снижения температуры
-let alpha = 0.5;
+let alpha = 0.8;
 
 //разница длин путей
 let deltaLengthPath = [];
@@ -92,9 +90,9 @@ let P = 0;
 
 let i = 1;
 
-console.log("Текущая температура: " + temperature);
+
 while (temperature >= 1) {
-    
+    //console.log("Текущая температура: " + temperature);
     //новый путь обхода
     crawlPath[i] = shuffleArray(crawlPath[i - 1]);
     //длина нового пути обхода
@@ -102,23 +100,33 @@ while (temperature >= 1) {
     //дельта путей обхода
     deltaLengthPath[i] = lengthPath[i] - lengthPath[i - 1];
 
-    console.log("Путь на итерации " + i + ": " + crawlPath[i]);
-    console.log("Длина пути на итерации " + i + ": " + lengthPath[i]);
+    //console.log("Путь на итерации " + i + ": " + crawlPath[i] + " имеет длину " + lengthPath[i]);
+
     //вычисление вероятности для выбора пути
     P = probability(deltaLengthPath[i], temperature);
 
     //если P больше случайного числа от 0 до 100, выбираем этот путь
-    if (P > Math.random * 100) {
+    let testP = Math.random() * 100;
+    //console.log("Случайное число для сравнения с P* = " + testP);
+    if (P > testP) {
+        if (lengthPath[i] < min) {
+            minNumber = i;
+        }
         i++;
+        //console.log("Путь на итерации " + i + " принят")
+    } else {
+        //console.log("Путь на итерации " + i + " не принят, откат на предыдущую итерацию");
     }
     
+
+
+
     //снижаем температуру
     temperature = temperature * alpha;
-
 }
 
-console.log("Итоговый путь: " + crawlPath[crawlPath.length - 1]);
-
+console.log("Итоговый путь: " + crawlPath[crawlPath.length - 1] + " имеет длину " + lengthPath[crawlPath.length - 1] + " достигнут на итерации " + (crawlPath.length - 1));
+console.log("Лучший путь: " + crawlPath[minNumber] + " имеет длину " + lengthPath[minNumber] + " достигнут на итерации " + minNumber);
 
 
 
