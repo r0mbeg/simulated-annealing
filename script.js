@@ -5,14 +5,10 @@ function getRandomInt(max) {
 }
 
 function travelTime(crawlPath, adjacencyMatrix) {
-    let str = "";
     let sum = 0;
     for (let i = 0; i < crawlPath.length - 1; i++) {
-        sum += adjacencyMatrix[crawlPath[i]][crawlPath[i + 1]];
-        //console.log(crawlPath[i] + " " + crawlPath[i + 1]);
-        str = str + " " + adjacencyMatrix[crawlPath[i]][crawlPath[i + 1]];
+        sum = sum + adjacencyMatrix[crawlPath[i]][crawlPath[i + 1]];
     }
-    //console.log(str);
     return sum;
 }
 
@@ -47,9 +43,15 @@ let adjacencyMatrix = [[0, 3, 4, 1, 2, 1],
                        [2, 4, 2, 1, 0, 2],
                        [1, 1, 1, 1, 2, 0]];
 
-////////////////////////////////////////////////////
-//длина пути
+///////////////////////////////
 
+
+
+
+//////////////////////////////
+                       
+
+                       
 //задание пути обхода
 let crawlPath = [];
 crawlPath[0] = [];
@@ -63,10 +65,10 @@ lengthPath[0] = travelTime(crawlPath[0], adjacencyMatrix);
 console.log("Стартовый путь: " + crawlPath[0] + " имеет длину " + lengthPath[0] + "\n\n");
 
 //начальная температура
-let temperature = 100;
+let temperature = 1000;
 
 //коэффициент снижения температуры
-let alpha = 0.6;
+let alpha = 0.5;
 
 //разница длин путей
 let deltaLengthPath = [];
@@ -78,11 +80,16 @@ let i = 1;
 
 let testP = Math.random() * 100;
 
-while (temperature >= 1) {
+//номер итогового пути
+let res = 0;
+
+while (temperature >= 0.01) {
     //новый путь обхода - меняему два случайных элемента
     crawlPath[i] = swapTwoRandom(crawlPath[i - 1]);
     //длина нового пути обхода
     lengthPath[i] = travelTime(crawlPath[i], adjacencyMatrix);
+
+
     
     //дельта путей обхода
     deltaLengthPath[i] = lengthPath[i] - lengthPath[i - 1];
@@ -91,9 +98,9 @@ while (temperature >= 1) {
     //если путь получился короче - переходим к следующей итерации
     if (deltaLengthPath[i] <= 0) {
         console.log("Путь на итерации " + i +" удачный \n\n");
+        res = i;
         i++;
     } else {//если путь получился длиннее - вычисляем P*
-        //console.log("Заход в вычисление P* на итерации " + i);
         //вычисление "вероятности"      для выбора пути
         P = probability(deltaLengthPath[i], temperature);
         //если P больше случайного числа от 0 до 100, выбираем этот путь
@@ -101,8 +108,10 @@ while (temperature >= 1) {
         //console.log("Текущая температура: " + temperature + " Величина P* равна " + P + " Величина testP равна " + testP);
         if (P > testP) {
             console.log (P + " > " + testP + " - Путь на итерации " + i + " принят \n\n");
+            res = i;
             i++;   
-        } else{
+        } else {
+            
             console.log (P + " <= " + testP + " - Путь на итерации " + i + " не принят \n\n");
         }
     }
@@ -111,8 +120,8 @@ while (temperature >= 1) {
 
 //настоящее решение - длина = 5
 
-console.log("Итоговый путь: " + crawlPath[crawlPath.length - 1] + " имеет длину " + 
-lengthPath[crawlPath.length - 1] + " достигнут на итерации " + (crawlPath.length - 1) + "\n\n");
+console.log("Итоговый путь: " + crawlPath[res] + " имеет длину " + 
+lengthPath[res] + " достигнут на итерации " + (res) + "\n\n");
 
 
 
