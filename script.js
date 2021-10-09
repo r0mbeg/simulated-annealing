@@ -65,13 +65,13 @@ lengthPath[0] = travelTime(crawlPath[0], adjacencyMatrix);
 console.log("Стартовый путь: " + crawlPath[0] + " имеет длину " + lengthPath[0] + "\n\n");
 
 //начальная температура
-let temperature = 1000;
+let temperature = 100;
 
 //коэффициент снижения температуры
-let alpha = 0.5;
+let alpha = 0.999;
 
 //разница длин путей
-let deltaLengthPath = [];
+let deltaLengthPath = 0;
 
 //вероятность для выбора пути
 let P = 0;
@@ -92,17 +92,17 @@ while (temperature >= 0.01) {
 
     
     //дельта путей обхода
-    deltaLengthPath[i] = lengthPath[i] - lengthPath[i - 1];
+    deltaLengthPath = lengthPath[i] - lengthPath[i - 1];
     
-    console.log("Путь на итерации " + i + ": " + crawlPath[i] + " имеет длину " + lengthPath[i] + " дельта = " + deltaLengthPath[i]);
+    console.log("Путь на итерации " + i + ": " + crawlPath[i] + " имеет длину " + lengthPath[i] + " дельта = " + deltaLengthPath);
     //если путь получился короче - переходим к следующей итерации
-    if (deltaLengthPath[i] <= 0) {
+    if (deltaLengthPath <= 0) {
         console.log("Путь на итерации " + i +" удачный \n\n");
         res = i;
         i++;
     } else {//если путь получился длиннее - вычисляем P*
         //вычисление "вероятности"      для выбора пути
-        P = probability(deltaLengthPath[i], temperature);
+        P = probability(deltaLengthPath, temperature);
         //если P больше случайного числа от 0 до 100, выбираем этот путь
         testP = Math.random() * 100;
         //console.log("Текущая температура: " + temperature + " Величина P* равна " + P + " Величина testP равна " + testP);
