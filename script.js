@@ -75,7 +75,12 @@ function changeOneRandom(crawlPath) {
 }
 
 function shufflePath(array) {
-    
+    tempArray = array.slice();
+    for (let i = 0; i < array.length * 2; i ++) {
+        tempArray = changeOneRandom(tempArray);
+    }
+    return tempArray;
+
 }
 
 function probability(deltaLengthPath, temperature) {
@@ -106,11 +111,12 @@ for (let i = 0; i < timeTable.length; i ++) {
 //последовательность обхода врачей
 let crawlPath = [];
 crawlPath[0] = [0, 2, 4, 6, 8];
+crawlPath[0] = shufflePath(crawlPath[0]);
 let pathTime = [];
 pathTime[0] = travelTime(crawlPath[0]);
 
 let time = new Date(pathTime[0]);
-console.log("Последовательность обхода " + crawlPath[0] + " займёт время " + (time.getHours() - 3) + ":" + time.getMinutes());
+console.log("Начальная последовательность обхода " + crawlPath[0] + " займёт время " + (time.getHours() - 3) + ":" + time.getMinutes());
 
 /*
 console.log("Исходная последовательность:");
@@ -154,29 +160,29 @@ while (temperature >= 0.01) {
     deltaPathTime = (pathTime[i] - pathTime[i - 1]);
     
     if (deltaPathTime <= 0) {
-        console.log("Путь на итерации " + i + " удачный \n\n");
+        //console.log("Путь на итерации " + i + " удачный \n\n");
         res = i;
         i++;
     } else {
         p = probability(deltaPathTime, temperature);
-        console.log("p = exp(-" + deltaPathTime + "/(1000000 * " + temperature + ")) = " +p);
+        //console.log("p = exp(-" + deltaPathTime + "/(10000000 * " + temperature + ")) = " +p);
         testP = Math.random() * 100;
 
         if (p > testP) {
-            console.log (p + " > " + testP + " - Путь на итерации " + i + " принят \n\n");
+            //console.log (p + " > " + testP + " - Путь на итерации " + i + " принят \n\n");
             res = i;
             i++;   
         } else {
-            console.log (p + " <= " + testP + " - Путь на итерации " + i + " не принят \n\n");
+            //console.log (p + " <= " + testP + " - Путь на итерации " + i + " не принят \n\n");
         }
         
     }
     temperature *= alpha;
 }
 
-console.log("Итоговый путь: " + crawlPath[res] + " имеет длину " + 
+console.log("Оптимальная последовательность обхода: " + crawlPath[res] + " займёт время " + 
 (new Date(pathTime[res]).getHours() - 3) + ":" + (new Date(pathTime[res]).getMinutes()) +
-" достигнут на итерации " + (res) + "\n\n");
+" и достигнута на итерации " + res);
 
 
 

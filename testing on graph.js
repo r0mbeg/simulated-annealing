@@ -105,6 +105,7 @@ while (temperature >= 0.01) {
         P = probability(deltaLengthPath, temperature);
         //если P больше случайного числа от 0 до 100, выбираем этот путь
         testP = Math.random() * 100;
+        console.log("P = exp(-" + deltaLengthPath + "/" + temperature + ")");
         //console.log("Текущая температура: " + temperature + " Величина P* равна " + P + " Величина testP равна " + testP);
         if (P > testP) {
             console.log (P + " > " + testP + " - Путь на итерации " + i + " принят \n\n");
