@@ -4,10 +4,47 @@ function getRandomInt(max) {
     return Math.floor(Math.random() * max);
 }
 
+function minIndexArray(array) {
+    let min = array[0];
+    let minIndex = 0;
+    for (let i = 0; i < array.length; i++) {
+        if (min > array[i]) {
+            min = array[i];
+            minIndex = i;
+        }
+    }
+    return minIndex;
+    
+}
+
+function travelLength(crawlPath, adjacencyMatrix) {
+    let sum = 0;
+    let tempCrawlPath = crawlPath.slice();
+    //массив последователности обхода, формирующийся на основе crawlPath
+    let crawlSequnce = [];
+
+    for (let i = 0; i < tempCrawlPath.length; i++) {
+        crawlSequnce[i] =  minIndexArray(tempCrawlPath);
+        //console.log("Минимум на итерации " + i + " равен элементу с индексом " + crawlSequnce[i]);
+        //console.log(tempCrawlPath);
+        tempCrawlPath[crawlSequnce[i]] = 9999;
+        
+        
+    }
+
+    
+    
+    
+    for (let i = 0; i < crawlPath.length - 1; i++) {
+        sum = sum + adjacencyMatrix[crawlSequnce[i]][crawlSequnce[i + 1]];
+    }
+    //console.log("Длина пути [" + crawlSequnce + "] равна " + sum);
+    return sum;
+}
+
 function travelTime(crawlPath) {
     let min = timeTable[0][crawlPath[0]];
     let max = timeTable[0][crawlPath[0]];
-
     for (let i = 0; i < crawlPath.length; i++) {
         if (timeTable[i][crawlPath[i]] > max) {
             max = timeTable[i][crawlPath[i]];
@@ -16,9 +53,7 @@ function travelTime(crawlPath) {
             min = timeTable[i][crawlPath[i]];
         }
     }
-
     //console.log("min = " + min + ", max = " + max);
-
     return (max - min);
 }
 
@@ -26,8 +61,6 @@ function changeOneRandom(crawlPath) {
     let tempCrawlPath = crawlPath.slice();
     //номер врача, у которого будем менять время
     let x = getRandomInt(timeTable.length);
-    
-    
     //количество миллисекунд в минуте
     let msMinutes = 1000 * 60;
     let diff = 0;
@@ -66,12 +99,7 @@ function changeOneRandom(crawlPath) {
     //+ timeTable[x][crawlPath[x]] + " на " + avaluable[y] + " : " + timeTable[x][avaluable[y]]);
     tempCrawlPath[x] = avaluable[y];
 
-
-    
     return tempCrawlPath;
-
-    
-
 }
 
 function shufflePath(array) {
@@ -87,6 +115,114 @@ function probability(deltaLengthPath, temperature) {
     return (100 * Math.exp(- (deltaLengthPath / (10000000 * temperature))));
 }
 
+
+function simulatedAnnealingMethod(crawlPath) {
+    crawlPath[0] = [0, 2, 4, 6, 8];
+    crawlPath[0] = shufflePath(crawlPath[0]);
+    //продолжительности посещений
+    let pathTime = [];
+    pathTime[0] = travelTime(crawlPath[0]);
+    //длины путей между врачами
+    let pathLength = [];
+    pathLength[0] = travelLength(crawlPath[0], adjacencyMatrix);
+    //сложности путей
+    let difficulty = [];
+    difficulty[0] = pathTime[0] * pathLength[0];
+    
+
+    let time = new Date(pathTime[0]);
+    console.log("Начальная последовательность обхода " + crawlPath[0] +
+    " занимает время " + (time.getHours() - 3) + ":" + time.getMinutes() +
+    " и имеет длину " + travelLength(crawlPath[0], adjacencyMatrix));
+
+    //начальная температура
+    let temperature = 100;
+
+    //коэффициент снижения температуры
+    let alpha = 0.999;
+
+    //сложность пути - функция от времени и
+    //расстояния между врачами
+
+
+    //вероятность для выбора пути
+    let p = 0;
+
+    let i = 1;
+
+    let testP = Math.random() * 100;
+
+    //номер итогового пути
+    let res = 0;
+
+    //разница между продолжительностями посещений
+    let deltaPathTime = 0;
+
+    //коэффициент сложности пути
+    //может быть увеличен если пациент, например, маломобилен
+    let difficultyFactor = 1;
+
+    //разница между сложностями
+    while (temperature >= 0.01) {
+        crawlPath[i] = changeOneRandom(crawlPath[i - 1]);
+        pathTime[i] = travelTime(crawlPath[i]);
+        pathLength[i] = travelLength(crawlPath[i], adjacencyMatrix);
+        difficulty[i] = pathTime[i] * pathLength[i] * difficultyFactor;
+
+        deltaDifficulty = difficulty[i] - difficulty[i - 1];
+
+        if (deltaDifficulty <= 0) {
+            //console.log("Путь на итерации " + i + " удачный \n\n");
+            res = i;
+            i++;
+        } else {
+            p = probability(deltaDifficulty, temperature);
+            //console.log("p = exp(-" + deltaPathTime + "/(10000000 * " + temperature + ")) = " +p);
+            testP = Math.random() * 100;
+    
+            if (p > testP) {
+                //console.log (p + " > " + testP + " - Путь на итерации " + i + " принят \n\n");
+                res = i;
+                i++;   
+            } else {
+                //console.log (p + " <= " + testP + " - Путь на итерации " + i + " не принят \n\n");
+            }
+            
+        }
+        temperature *= alpha;
+    }
+        
+
+        /*
+        deltaPathTime = (pathTime[i] - pathTime[i - 1]);
+        if (deltaPathTime <= 0) {
+            //console.log("Путь на итерации " + i + " удачный \n\n");
+            res = i;
+            i++;
+        } else {
+            p = probability(deltaPathTime, temperature);
+            //console.log("p = exp(-" + deltaPathTime + "/(10000000 * " + temperature + ")) = " +p);
+            testP = Math.random() * 100;
+    
+            if (p > testP) {
+                //console.log (p + " > " + testP + " - Путь на итерации " + i + " принят \n\n");
+                res = i;
+                i++;   
+            } else {
+                //console.log (p + " <= " + testP + " - Путь на итерации " + i + " не принят \n\n");
+            }
+            
+        }
+        temperature *= alpha;
+    }
+    */
+    console.log("Оптимальная последовательность обхода: " + crawlPath[res] + " занимает время " + 
+    (new Date(pathTime[res]).getHours() - 3) + ":" + (new Date(pathTime[res]).getMinutes()) +
+    ", достигнута на итерации " + res + " и имеет длину " + travelLength(crawlPath[res], adjacencyMatrix));
+    
+}
+
+
 //задание расписания врачей
 //массив из 5 врачей
 let timeTable = new Array(5);
@@ -98,91 +234,26 @@ for (let i = 0; i < timeTable.length; i ++) {
     }   
 }
 
-/*
-for (let i = 0; i < timeTable.length; i ++) {
-    console.log("Расписание врача № " + i);
-    for (let j = 0; j < timeTable[i].length; j++) {
-        console.log("   " + j + ": " + timeTable[i][j]);
-    }
-}*/
-
+//задание расстояний между кабинетами 
+//с помощью матрицы смежности
+let adjacencyMatrix = [[0, 3, 4, 1, 1],
+                       [3, 0, 1, 3, 1],
+                       [4, 1, 0, 1, 1],
+                       [1, 3, 1, 0, 1],
+                       [1, 1, 1, 1, 0]];
 
 
 //последовательность обхода врачей
 let crawlPath = [];
-crawlPath[0] = [0, 2, 4, 6, 8];
-crawlPath[0] = shufflePath(crawlPath[0]);
-let pathTime = [];
-pathTime[0] = travelTime(crawlPath[0]);
 
-let time = new Date(pathTime[0]);
-console.log("Начальная последовательность обхода " + crawlPath[0] + " займёт время " + (time.getHours() - 3) + ":" + time.getMinutes());
 
-/*
-console.log("Исходная последовательность:");
-console.log("Врач №0 " + timeTable[0][crawlPath[0][0]]);
-console.log("Врач №1 " + timeTable[0][crawlPath[0][1]]);
-console.log("Врач №2 " + timeTable[0][crawlPath[0][2]]);
-console.log("Врач №3 " + timeTable[0][crawlPath[0][3]]);
-console.log("Врач №4 " + timeTable[0][crawlPath[0][4]]);
-*/
+simulatedAnnealingMethod(crawlPath);
 
-//crawlPath[1] = changeOneRandom(crawlPath[0]);
-//console.log("\n");
-//pathTime[1] = travelTime(crawlPath[1]);
-//time = new Date(pathTime[1]);
 
-//console.log("Последовательность обхода " + crawlPath[1] + " займёт время " + (time.getHours() - 3) + ":" + time.getMinutes());
 
-//начальная температура
-let temperature = 100;
 
-//коэффициент снижения температуры
-let alpha = 0.999;
 
-//разница длин путей
-let deltaLengthPath = 0;
 
-//вероятность для выбора пути
-let p = 0;
-
-let i = 1;
-
-let testP = Math.random() * 100;
-
-//номер итогового пути
-let res = 0;
-
-while (temperature >= 0.01) {
-    crawlPath[i] = changeOneRandom(crawlPath[i - 1]);
-    pathTime[i] = travelTime(crawlPath[i]);
-
-    deltaPathTime = (pathTime[i] - pathTime[i - 1]);
-    
-    if (deltaPathTime <= 0) {
-        //console.log("Путь на итерации " + i + " удачный \n\n");
-        res = i;
-        i++;
-    } else {
-        p = probability(deltaPathTime, temperature);
-        //console.log("p = exp(-" + deltaPathTime + "/(10000000 * " + temperature + ")) = " +p);
-        testP = Math.random() * 100;
-
-        if (p > testP) {
-            //console.log (p + " > " + testP + " - Путь на итерации " + i + " принят \n\n");
-            res = i;
-            i++;   
-        } else {
-            //console.log (p + " <= " + testP + " - Путь на итерации " + i + " не принят \n\n");
-        }
-        
-    }
-    temperature *= alpha;
-}
-
-console.log("Оптимальная последовательность обхода: " + crawlPath[res] + " займёт время " + 
-(new Date(pathTime[res]).getHours() - 3) + ":" + (new Date(pathTime[res]).getMinutes()) +
-" и достигнута на итерации " + res);
 
 
 

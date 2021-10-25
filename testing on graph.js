@@ -36,15 +36,19 @@ function probability(deltaLengthPath, temperature) {
     return (100 * Math.exp(- (deltaLengthPath / temperature)));
 }
 
-let adjacencyMatrix = [[0, 3, 4, 1, 2, 1],
+/*let adjacencyMatrix = [[0, 3, 4, 1, 2, 1],
                        [3, 0, 1, 3, 4, 1],
                        [4, 1, 0, 1, 2, 1],
                        [1, 3, 1, 0, 1, 1],
                        [2, 4, 2, 1, 0, 2],
-                       [1, 1, 1, 1, 2, 0]];
+                       [1, 1, 1, 1, 2, 0]];*/
 
 ///////////////////////////////
-
+let adjacencyMatrix = [[0, 3, 4, 1, 1],
+                       [3, 0, 1, 3, 1],
+                       [4, 1, 0, 1, 1],
+                       [1, 3, 1, 0, 1],
+                       [1, 1, 1, 1, 0]];
 
 
 
