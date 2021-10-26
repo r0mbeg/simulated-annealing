@@ -31,9 +31,6 @@ function travelLength(crawlPath, adjacencyMatrix) {
         
         
     }
-
-    
-    
     
     for (let i = 0; i < crawlPath.length - 1; i++) {
         sum = sum + adjacencyMatrix[crawlSequnce[i]][crawlSequnce[i + 1]];
@@ -53,7 +50,6 @@ function travelTime(crawlPath) {
             min = timeTable[i][crawlPath[i]];
         }
     }
-    //console.log("min = " + min + ", max = " + max);
     return (max - min);
 }
 
@@ -88,15 +84,10 @@ function changeOneRandom(crawlPath) {
     //если таких номерков нет, то запишем в массив тот номерок, который уже был выбран
     if (avaluable.length == 0) {
         avaluable.push(x);
-    }
-    //console.log("Список доступных номерков" + avaluable);
-    
-    
+    }   
+
     //среди свободных номерков выберем случайным образом один
     let y = getRandomInt(avaluable.length);
-
-  //  console.log("У врача №" + x + " время изменено с " + crawlPath[x] + " : " 
-    //+ timeTable[x][crawlPath[x]] + " на " + avaluable[y] + " : " + timeTable[x][avaluable[y]]);
     tempCrawlPath[x] = avaluable[y];
 
     return tempCrawlPath;
@@ -117,6 +108,7 @@ function probability(deltaLengthPath, temperature) {
 
 
 function simulatedAnnealingMethod(crawlPath) {
+    
     crawlPath[0] = [0, 2, 4, 6, 8];
     crawlPath[0] = shufflePath(crawlPath[0]);
     //продолжительности посещений
@@ -127,7 +119,10 @@ function simulatedAnnealingMethod(crawlPath) {
     pathLength[0] = travelLength(crawlPath[0], adjacencyMatrix);
     //сложности путей
     let difficulty = [];
-    difficulty[0] = pathTime[0] * pathLength[0];
+    //коэффициент сложности пути
+    //может быть увеличен если пациент, например, маломобилен
+    let difficultyFactor = 700000;
+    difficulty[0] = pathTime[0] + pathLength[0] * difficultyFactor;
     
 
     let time = new Date(pathTime[0]);
@@ -158,16 +153,15 @@ function simulatedAnnealingMethod(crawlPath) {
     //разница между продолжительностями посещений
     let deltaPathTime = 0;
 
-    //коэффициент сложности пути
-    //может быть увеличен если пациент, например, маломобилен
-    let difficultyFactor = 1;
+    
+    
 
     //разница между сложностями
     while (temperature >= 0.01) {
         crawlPath[i] = changeOneRandom(crawlPath[i - 1]);
         pathTime[i] = travelTime(crawlPath[i]);
         pathLength[i] = travelLength(crawlPath[i], adjacencyMatrix);
-        difficulty[i] = pathTime[i] * pathLength[i] * difficultyFactor;
+        difficulty[i] = pathTime[i] + pathLength[i] * difficultyFactor;
 
         deltaDifficulty = difficulty[i] - difficulty[i - 1];
 
@@ -192,33 +186,10 @@ function simulatedAnnealingMethod(crawlPath) {
         temperature *= alpha;
     }
         
-
-        /*
-        deltaPathTime = (pathTime[i] - pathTime[i - 1]);
-        if (deltaPathTime <= 0) {
-            //console.log("Путь на итерации " + i + " удачный \n\n");
-            res = i;
-            i++;
-        } else {
-            p = probability(deltaPathTime, temperature);
-            //console.log("p = exp(-" + deltaPathTime + "/(10000000 * " + temperature + ")) = " +p);
-            testP = Math.random() * 100;
-    
-            if (p > testP) {
-                //console.log (p + " > " + testP + " - Путь на итерации " + i + " принят \n\n");
-                res = i;
-                i++;   
-            } else {
-                //console.log (p + " <= " + testP + " - Путь на итерации " + i + " не принят \n\n");
-            }
-            
-        }
-        temperature *= alpha;
-    }
-    */
     console.log("Оптимальная последовательность обхода: " + crawlPath[res] + " занимает время " + 
     (new Date(pathTime[res]).getHours() - 3) + ":" + (new Date(pathTime[res]).getMinutes()) +
-    ", достигнута на итерации " + res + " и имеет длину " + travelLength(crawlPath[res], adjacencyMatrix));
+    ", достигнута на итерации " + res + " и имеет длину " + travelLength(crawlPath[res], adjacencyMatrix) + 
+    " а время = " + pathTime[res] + ", сложность = " + difficulty[res]);
     
 }
 
