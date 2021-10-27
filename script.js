@@ -53,7 +53,11 @@ function travelTime(crawlPath) {
     return (max - min);
 }
 
-function changeOneRandom(crawlPath) {
+
+//функция, меняющая у случайного врача время
+//при этом учитывается промежуток времени, 
+//в который пациент может посетить врачей
+function changeOneRandom(crawlPath, startTime, endTime) {
     let tempCrawlPath = crawlPath.slice();
     //номер врача, у которого будем менять время
     let x = getRandomInt(timeTable.length);
@@ -69,11 +73,14 @@ function changeOneRandom(crawlPath) {
         flag = true;
         for (let j = 0; j < crawlPath.length; j++) {
             diff = (Math.abs(Math.floor(  (timeTable[x][i] - timeTable[j][crawlPath[j]]))) / msMinutes);
+            //если промежуток между посещениями меньше 30мин
+            //то такое время не добавляем в avaluable
             if (diff < 30) {
                 flag = false;
                 //console.log("Время " + timeTable[x][i] + " не подходит!");
                 break;
             }
+
         }
         if (flag == true) {
             avaluable.push(i);
@@ -81,22 +88,43 @@ function changeOneRandom(crawlPath) {
         }
     }
 
+    
+
+
     //если таких номерков нет, то запишем в массив тот номерок, который уже был выбран
     if (avaluable.length == 0) {
         avaluable.push(x);
     }   
 
+    //если время посещения не находится в промежутке от startTime
+    //до endTime то выводим сообщение об ошибке
+    let timeFlag = true;
+
+    for (let i = 0; i < avaluable.length; i++) {
+        if (avaluable[i] > endTime || avaluable[i] < startTime) {
+            console.log("Время " + (new Date(avaluable[i]).getHours() - 3) + 
+            ":" + (new Date(avaluable[i]).getMinutes()) + " не подходит из-за промежутка!");
+            avaluable.splice(i, 1);
+            i--;
+        }
+    }
+
+    if (avaluable.length > 0) {
     //среди свободных номерков выберем случайным образом один
     let y = getRandomInt(avaluable.length);
     tempCrawlPath[x] = avaluable[y];
 
     return tempCrawlPath;
+    } else if (avaluable.length > 0) {
+        console.log("Подобрать оптимальную последовательность невозможно!");
+        return crawlPath;
+    }
 }
 
-function shufflePath(array) {
+function shufflePath(array, startTime, endTime) {
     tempArray = array.slice();
     for (let i = 0; i < array.length * 2; i ++) {
-        tempArray = changeOneRandom(tempArray);
+        tempArray = changeOneRandom(tempArray, startTime, endTime);
     }
     return tempArray;
 
@@ -107,10 +135,10 @@ function probability(deltaLengthPath, temperature) {
 }
 
 
-function simulatedAnnealingMethod(crawlPath) {
+function simulatedAnnealingMethod(crawlPath, startTime, endTime) {
     
     crawlPath[0] = [0, 2, 4, 6, 8];
-    crawlPath[0] = shufflePath(crawlPath[0]);
+    crawlPath[0] = shufflePath(crawlPath[0], startTime, endTime);
     //продолжительности посещений
     let pathTime = [];
     pathTime[0] = travelTime(crawlPath[0]);
@@ -158,7 +186,7 @@ function simulatedAnnealingMethod(crawlPath) {
 
     //разница между сложностями
     while (temperature >= 0.01) {
-        crawlPath[i] = changeOneRandom(crawlPath[i - 1]);
+        crawlPath[i] = changeOneRandom(crawlPath[i - 1], startTime, endTime);
         pathTime[i] = travelTime(crawlPath[i]);
         pathLength[i] = travelLength(crawlPath[i], adjacencyMatrix);
         difficulty[i] = pathTime[i] + pathLength[i] * difficultyFactor;
@@ -218,7 +246,8 @@ let adjacencyMatrix = [[0, 3, 4, 1, 1],
 let crawlPath = [];
 
 
-simulatedAnnealingMethod(crawlPath);
+simulatedAnnealingMethod(crawlPath, new Date(2021, 9, 18, 12, 0), new Date(2021, 9, 18, 13, 0));
+
 
 
 
