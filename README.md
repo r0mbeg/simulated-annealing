@@ -85,6 +85,16 @@ The current temperature is `99.8001`.
 
 ![p = 100 \cdot e^{\frac{10000000 - 11800000}{99.8001 \cdot 10000000}} \approx 99.8198020](https://latex.codecogs.com/gif.latex?%5CLARGE%20p%20%3D%20100%20%5Ccdot%20e%5E%7B%5Cfrac%7B10000000%20-%2011800000%7D%7B99.8001%20%5Ccdot%2010000000%7D%7D%20%5Capprox%2099.8198020)
 
+This value is compared with a random number from 0 to 100 `testP`. If p > test P, then this sequence of traversing the premises and the transition to the next iteration occurs. If p <= test P, then this sequence of visits is discarded and the iteration occurs anew. 
+
+## Iterations 3 - ... ##
+
+After each iteration, the temperature decreases and the algorithm shuts down when it becomes less than `0.001`. 
+
+The optimal solution is considered to be the last successful sequence of visits
+
+
+
 
 
 
