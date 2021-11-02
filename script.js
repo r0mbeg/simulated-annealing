@@ -307,8 +307,9 @@ let adjacencyMatrix = [[0, 3, 4, 1, 1],
 //последовательность обхода врачей
 let crawlPath = [];
 
-
-simulatedAnnealingMethod(crawlPath, new Date(2021, 9, 18, 8, 0), new Date(2021, 9, 18, 10, 30));
+startTime = new Date(2021, 9, 18, 8, 0);
+endTime = new Date(2021, 9, 18, 10, 30);
+simulatedAnnealingMethod(crawlPath, startTime, endTime);
 
 
 
