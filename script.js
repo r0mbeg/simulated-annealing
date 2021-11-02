@@ -225,6 +225,7 @@ function simulatedAnnealingMethod(crawlPath, startTime, endTime) {
                 //console.log("Подобрать оптимальную последовательность невозможно!");
                 break;
             } else {
+                console.log("Последовательность обхода на итерации №" + i + ": " + crawlPath[i]);
                 pathTime[i] = travelTime(crawlPath[i]);
                 pathLength[i] = travelLength(crawlPath[i], adjacencyMatrix);
                 difficulty[i] = pathTime[i] + pathLength[i] * difficultyFactor;
@@ -265,11 +266,11 @@ function simulatedAnnealingMethod(crawlPath, startTime, endTime) {
 
        
         
-        console.log("Время первого посещения:\n" + 
-        timetable[minIndexArray(crawlPath[res])][crawlPath[res][minIndexArray(crawlPath[res])]]);
+        //console.log("Время первого посещения:\n" + 
+        //timetable[minIndexArray(crawlPath[res])][crawlPath[res][minIndexArray(crawlPath[res])]]);
 
-        console.log("Время последнего посещения:\n" + 
-        timetable[maxIndexArray(crawlPath[res])][crawlPath[res][maxIndexArray(crawlPath[res])]]);
+        //console.log("Время последнего посещения:\n" + 
+        //timetable[maxIndexArray(crawlPath[res])][crawlPath[res][maxIndexArray(crawlPath[res])]]);
         
         
 
