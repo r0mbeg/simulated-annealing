@@ -81,9 +81,9 @@ The current temperature is `99.8001`.
 
 `difficulty[1] < difficulty[2]`, but we do not discard the sequence crawlPath[2], but calculate a special value:
 
-![p = 100\cdot e^{\frac{difficulty[1] - difficulty[2]}{10000000 * temperature}}](https://latex.codecogs.com/gif.latex?%5Chuge%20p%20%3D%20100%5Ccdot%20e%5E%7B%5Cfrac%7Bdifficulty%5B1%5D%20-%20difficulty%5B2%5D%7D%7B10000000%20*%20temperature%7D%7D)
+![p = 100\cdot e^{\frac{difficulty[1] - difficulty[2]}{10000000 * temperature}}](https://latex.codecogs.com/gif.latex?%5Clarge%20p%20%3D%20100%5Ccdot%20e%5E%7B%5Cfrac%7Bdifficulty%5B1%5D%20-%20difficulty%5B2%5D%7D%7B10000000%20*%20temperature%7D%7D)
 
-![p = 100 \cdot e^{\frac{10000000 - 11800000}{99.8001 \cdot 10000000}} \approx 99.8198020](https://latex.codecogs.com/gif.latex?%5Chuge%20p%20%3D%20100%20%5Ccdot%20e%5E%7B%5Cfrac%7B10000000%20-%2011800000%7D%7B99.8001%20%5Ccdot%2010000000%7D%7D%20%5Capprox%2099.8198020)
+![p = 100 \cdot e^{\frac{10000000 - 11800000}{99.8001 \cdot 10000000}} \approx 99.8198020](https://latex.codecogs.com/gif.latex?%5Clarge%20p%20%3D%20100%20%5Ccdot%20e%5E%7B%5Cfrac%7B10000000%20-%2011800000%7D%7B99.8001%20%5Ccdot%2010000000%7D%7D%20%5Capprox%2099.8198020  )
 
 
 
