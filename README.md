@@ -1,8 +1,8 @@
- # Simulated annealing method #
+# Simulated annealing method
  
  Implementation of the metal annealing method for making the optimal sequence of visits to doctors in the polyclinic.
 
-## Problem description ##
+## Problem description
 
  The distances between the cabinets are set using the adjacency matrix:
 
