@@ -16,6 +16,16 @@ function minIndexArray(array) {
     return minIndex;
 }
 
+function displayTime(date) {
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    if (minutes == 0) {
+        return hours + ":00";
+    } else {
+        return hours + ":" + minutes;
+    }
+}
+
 function maxIndexArray(array) {
     let max = array[0];
     let maxIndex = 0;
@@ -115,6 +125,7 @@ function changeOneRandom(crawlPath, startTime, endTime) {
             //console.log("Время " + timetable[x][i] + " подходит!");
         }
     }
+    
 
     //если таких номерков нет, то запишем в массив тот номерок, который уже был выбран
     if (avaluable.length == 0) {
@@ -141,6 +152,7 @@ function changeOneRandom(crawlPath, startTime, endTime) {
     let y = getRandomInt(avaluable.length);
     tempCrawlPath[x] = avaluable[y];
     return tempCrawlPath;
+    
     } else if (avaluable.length == 0) {
         //console.log("Подобрать оптимальную последовательность невозможно!");
         return null;
@@ -165,10 +177,12 @@ function probability(deltaLengthPath, temperature) {
 function simulatedAnnealingMethod(crawlPath, startTime, endTime) {
     
     console.log("Подбираем оптимальную последовательность в промежутке от " +
-    startTime.getHours() + ":" + startTime.getMinutes() + " до " + endTime.getHours() + ":" + endTime.getMinutes());
+    displayTime(startTime) + " до " + displayTime(endTime));
 
-    crawlPath[0] = [0, 2, 4, 6, 8];
+    crawlPath[0] = [0, 1, 2];
+    
     crawlPath[0] = shufflePath(crawlPath[0], startTime, endTime);
+    
     //продолжительности посещений
     let pathTime = [];
     pathTime[0] = travelTime(crawlPath[0]);
@@ -187,7 +201,7 @@ function simulatedAnnealingMethod(crawlPath, startTime, endTime) {
 
     if (crawlPath[0] != null) {
         console.log("Начальная последовательность обхода " + crawlPath[0] +
-        " занимает время " + (time.getHours()) + ":" + time.getMinutes() +
+        " занимает время " + displayTime(time) +
         " и имеет длину " + travelLength(crawlPath[0], adjacencyMatrix));
     }
     
@@ -225,7 +239,7 @@ function simulatedAnnealingMethod(crawlPath, startTime, endTime) {
                 //console.log("Подобрать оптимальную последовательность невозможно!");
                 break;
             } else {
-                console.log("Последовательность обхода на итерации №" + i + ": " + crawlPath[i]);
+                //console.log("Последовательность обхода на итерации №" + i + ": " + crawlPath[i]);
                 pathTime[i] = travelTime(crawlPath[i]);
                 pathLength[i] = travelLength(crawlPath[i], adjacencyMatrix);
                 difficulty[i] = pathTime[i] + pathLength[i] * difficultyFactor;
@@ -259,10 +273,24 @@ function simulatedAnnealingMethod(crawlPath, startTime, endTime) {
         
     if (travelLength(crawlPath[res], adjacencyMatrix) != null) {
         console.log("Оптимальная последовательность обхода в промежутке от " +
-        startTime.getHours() + ":" + startTime.getMinutes() + " до " + endTime.getHours() + 
-        ":" + endTime.getMinutes() + " - " + crawlPath[res] + " занимает время " + 
-        (new Date(pathTime[res]).getHours()) + ":" + (new Date(pathTime[res]).getMinutes()) +
+        displayTime(startTime) + " до " + displayTime(endTime) + " - " + 
+        crawlPath[res] + " занимает время " + displayTime(new Date(pathTime[res])) +
         ", достигнута на итерации " + res + " и имеет длину " + travelLength(crawlPath[res], adjacencyMatrix));
+
+        console.log("Последовательность обхода:");
+
+        docCrawlPath = crawlPath[res].slice();
+
+
+
+        
+        for (let i = 0; i < docCrawlPath.length; i++) {
+            console.log(doctors[i] + " - " + displayTime(timetable[i][crawlPath[res][i]]));
+        }
+
+        
+
+
 
        
         
@@ -286,6 +314,9 @@ function simulatedAnnealingMethod(crawlPath, startTime, endTime) {
 
 
 //задание расписания врачей
+
+
+/*
 //массив из 5 врачей
 let timetable = new Array(5);
 for (let i = 0; i < timetable.length; i ++) {
@@ -294,27 +325,56 @@ for (let i = 0; i < timetable.length; i ++) {
     for (let j = 0; j < timetable[i].length; j++) {
         timetable[i][j] = new Date(2021, 9, 18, 8, j * 15);
     }   
+}*/
+
+//считываем все элементы fieldset
+let fieldsets = document.querySelectorAll('fieldset');
+//console.log(fieldset);
+let buttons = [];
+//console.log(fieldset[2].length);
+//for (let i = 1; i < )
+
+for (let i = 3; i < fieldsets.length; i ++) {
+    buttons[i - 3] = fieldsets[i].querySelectorAll('button.buttonsmall');
+    
 }
+//console.log(buttons.length);
+let timetable = [];
+for (let i = 0; i < buttons.length; i ++) {
+    timetable[i] = [];
+}
+
+
+for (let i = 0; i < buttons.length; i++) {
+    for (let j = 0; j < buttons[i].length; j++) {
+        timetable[i][j] = new Date('November 8, 2021 ' + buttons[i][j].innerHTML);
+        
+    }
+}
+
+let doctors = [];
+	for (let i = 3; i < fieldsets.length; i ++) {
+		doctors[i - 3] = fieldsets[i].querySelector('legend').innerHTML.trim();
+}
+
 
 //задание расстояний между кабинетами 
 //с помощью матрицы смежности
-let adjacencyMatrix = [[0, 3, 4, 1, 1],
-                       [3, 0, 1, 3, 1],
-                       [4, 1, 0, 1, 1],
-                       [1, 3, 1, 0, 1],
-                       [1, 1, 1, 1, 0]];
+let adjacencyMatrix = [[0, 1, 1],
+                       [1, 0, 1], 
+                       [1, 1, 0]];
 
 
 //последовательность обхода врачей
 let crawlPath = [];
 
-startTime = new Date(2021, 9, 18, 8, 0);
-endTime = new Date(2021, 9, 18, 10, 30);
-simulatedAnnealingMethod(crawlPath, startTime, endTime);
+startTime = new Date(2021, 10, 8, 11, 0);
+endTime = new Date(2021, 10, 8, 14, 0);
 
 
-
-
+function test() {
+    simulatedAnnealingMethod(crawlPath, startTime, endTime);    
+}
 
 
 

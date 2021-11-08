@@ -1,12 +1,150 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Метод отжига</title>
-</head>
-<body>
-    <script src="script.js"> </script>
-</body>
-</html>
+
+<!-- saved from url=(0034)http://127.0.0.1/cgi-bin/tcgi1.exe -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link id="maincss1" href="sv.css" type="text/css" rel="stylesheet">
+<link id="maincss2" href="accordion.css" type="text/css" rel="stylesheet">
+<link id="localcss1" href="svlocal.css" type="text/css" rel="stylesheet">
+<link id="localcss2" href="svlocal_tcgi1.css" type="text/css" rel="stylesheet">
+<title>Запись к нескольким врачам </title>
+
+<meta http-equiv="Page-Exit" content="blendTrans(Duration=0.35)">
+<script type="text/javascript" src="alib.js.">
+</script>
+<script type="text/javascript" src="aliblocal.js">
+</script>
+<script type="text/javascript" src="jsonp.js">
+</script>
+<style>v\:* { behavior: url(#default#VML) }  </style>
+<style type="text/css">@font-face {
+  font-family: 'rbicon';
+  src: url(chrome-extension://dipiagiiohfljcicegpgffpbnjmgjcnf/fonts/rbicon.woff2) format("woff2");
+  font-weight: normal;
+  font-style: normal; }
+</style></head>
+<body id="body1" onkeydown="bodyeventkey(event)" onhelp="showInfoImage();return false">
+<div id="allpage">
+<table id="titlepage_queue_table" width="100%" border="0">
+<tbody><tr>
+<td id="titlepage_queue_cell_left">
+</td>
+<td id="titlepage_queue_cell_info">
+<table width="100%">
+<tbody><tr>
+<td align="center" class="TITLEFILTER">
+ПК "WEB Поликлиника"  Самозапись (C) ЗАО "СВ-мед" 2007-21 вер.7.028
+</td>
+</tr>
+<tr>
+<td align="center" class="TITLE">
+СПб ГБУЗ "Городская поликлиника N71 Лаборатория"
+</td>
+</tr>
+<tr>
+<td align="center" class="TITLE">
+Запись к нескольким врачам
+</td>
+</tr>
+</tbody></table>
+</td>
+<td id="titlepage_queue_cell_right">
+</td>
+</tr>
+</tbody></table>
+<form id="fprint" method="POST" target="_blank" action="http://127.0.0.1/cgi-bin/tcgi1.exe">
+<input type="hidden" name="USER" value="S">
+<input id="rull" type="hidden" name="RULL" value="PRINTMULTIVIZIT">
+<input type="hidden" name="SURNAME" value="ТЕСТОВСКИЙ">
+<input type="hidden" name="NAME1" value="ИВАН">
+<input type="hidden" name="NAME2" value="ИВАНОВИЧ">
+<input type="hidden" name="DR" value="26/11/1987">
+<input type="hidden" name="SMO" value="кРосн">
+<input type="hidden" name="SERPOLIS" value="ВС">
+<input type="hidden" name="NPOLIS" value="003673417">
+<input type="hidden" name="TYPEDOC" value="Н">
+<input type="hidden" name="SERDOC" value="41 03">
+<input type="hidden" name="NDOC" value="558228">
+<input type="hidden" name="TEL" value="1234567">
+<input type="hidden" name="PIN" value="АААВ204976">
+<input type="hidden" name="ADDR1" value="АЛЬПИЙСКИЙ.ПУ,дом.10">
+<input type="hidden" name="POLISD2" value="01/01/1900">
+<input type="hidden" name="POLISD1" value="14/08/2012">
+<input type="hidden" name="NRSTR" value="2">
+<input type="hidden" name="PLACEWORKCLN" value="АААВ204976">
+</form>
+<form id="f1" method="POST" action="http://127.0.0.1/cgi-bin/tcgi1.exe">
+<input type="hidden" name="USER" value="S">
+<input id="rull" type="hidden" name="RULL" value="MULTIVIZIT">
+<input id="param" type="hidden" name="PARAM" value="">
+<input id="codemed" type="hidden" name="CODEMED" value="">
+<input id="codedate" type="hidden" name="DATE" value="">
+<input id="codetime" type="hidden" name="TIME" value="">
+<input type="hidden" name="SURNAME" value="ТЕСТОВСКИЙ">
+<input type="hidden" name="NAME1" value="ИВАН">
+<input type="hidden" name="NAME2" value="ИВАНОВИЧ">
+<input type="hidden" name="DR" value="26/11/1987">
+<input type="hidden" name="SMO" value="кРосн">
+<input type="hidden" name="SERPOLIS" value="ВС">
+<input type="hidden" name="NPOLIS" value="003673417">
+<input type="hidden" name="TYPEDOC" value="Н">
+<input type="hidden" name="SERDOC" value="41 03">
+<input type="hidden" name="NDOC" value="558228">
+<input type="hidden" name="TEL" value="1234567">
+<input type="hidden" name="PIN" value="АААВ204976">
+<input type="hidden" name="ADDR1" value="АЛЬПИЙСКИЙ.ПУ,дом.10">
+<input type="hidden" name="POLISD2" value="01/01/1900">
+<input type="hidden" name="POLISD1" value="14/08/2012">
+<input type="hidden" name="NRSTR" value="2">
+<input type="hidden" name="PLACEWORKCLN" value="АААВ204976">
+<fieldset>
+<input id="buttonrefresh" type="image" height="32" src="refresh.png" title="Обновить">
+<input id="buttonprint" type="image" onclick="try {getEl(&#39;fprint&#39;).submit()} catch (e) {alert(e)}" height="32" src="print1.png" title="Печать списка" form="fprint">
+</fieldset>
+<fieldset><legend>Параметры записи</legend>
+<table style="width:100%"><tbody><tr>
+<td>Пациент:</td>
+<td>ТЕСТОВСКИЙ ИВАН ИВАНОВИЧ 26/11/1987</td>
+<td>Дата:</td>
+<td class="INFO">
+<input id="DATEMULTIVIZIT" type="TEXT" name="DATEMULTIVIZIT" value="31/08/2021" size="11" class="INFO" onchange="try {getEl(&#39;buttonrefresh&#39;).click()} catch(e) {alert(e)}">
+<button type="button" class="BUTTONSMALL INFO" style="width:auto" onclick="dialogInputDate(&#39;DATEMULTIVIZIT&#39;)" title="Вызов календаря">
+&#9776;
+</button>
+</td>
+</tr></tbody></table>
+</fieldset>
+<style>
+.my-badge {background-color:#fff;color:#000;display:inline-block;padding-left:8px;padding-right:8px;text-align:center;border-radius:50%}
+</style>
+<fieldset><legend>Номерки пациента</legend>
+У пациента нет взятых номерков
+</fieldset>
+<fieldset><legend>
+Маммография (Лучевая диагностика)
+</legend>
+<button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="08:00:00" data-planqueue-free-codemed="47" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;47&#39;;getEl(&#39;codetime&#39;).value=&#39;08:00:00&#39;;getEl(&#39;f1&#39;).submit()">08:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="09:00:00" data-planqueue-free-codemed="47" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;47&#39;;getEl(&#39;codetime&#39;).value=&#39;09:00:00&#39;;getEl(&#39;f1&#39;).submit()">09:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="10:00:00" data-planqueue-free-codemed="47" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;47&#39;;getEl(&#39;codetime&#39;).value=&#39;10:00:00&#39;;getEl(&#39;f1&#39;).submit()">10:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="11:00:00" data-planqueue-free-codemed="47" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;47&#39;;getEl(&#39;codetime&#39;).value=&#39;11:00:00&#39;;getEl(&#39;f1&#39;).submit()">11:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="12:00:00" data-planqueue-free-codemed="47" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;47&#39;;getEl(&#39;codetime&#39;).value=&#39;12:00:00&#39;;getEl(&#39;f1&#39;).submit()">12:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="13:00:00" data-planqueue-free-codemed="47" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;47&#39;;getEl(&#39;codetime&#39;).value=&#39;13:00:00&#39;;getEl(&#39;f1&#39;).submit()">13:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="14:00:00" data-planqueue-free-codemed="47" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;47&#39;;getEl(&#39;codetime&#39;).value=&#39;14:00:00&#39;;getEl(&#39;f1&#39;).submit()">14:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="15:00:00" data-planqueue-free-codemed="47" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;47&#39;;getEl(&#39;codetime&#39;).value=&#39;15:00:00&#39;;getEl(&#39;f1&#39;).submit()">15:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="16:00:00" data-planqueue-free-codemed="47" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;47&#39;;getEl(&#39;codetime&#39;).value=&#39;16:00:00&#39;;getEl(&#39;f1&#39;).submit()">16:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="17:00:00" data-planqueue-free-codemed="47" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;47&#39;;getEl(&#39;codetime&#39;).value=&#39;17:00:00&#39;;getEl(&#39;f1&#39;).submit()">17:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="18:00:00" data-planqueue-free-codemed="47" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;47&#39;;getEl(&#39;codetime&#39;).value=&#39;18:00:00&#39;;getEl(&#39;f1&#39;).submit()">18:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="19:00:00" data-planqueue-free-codemed="47" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;47&#39;;getEl(&#39;codetime&#39;).value=&#39;19:00:00&#39;;getEl(&#39;f1&#39;).submit()">19:00:00</button>
+</fieldset>
+<fieldset><legend>
+КТ + МРТ (Лучевая диагностика)
+</legend>
+<button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="08:00:00" data-planqueue-free-codemed="44" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;44&#39;;getEl(&#39;codetime&#39;).value=&#39;08:00:00&#39;;getEl(&#39;f1&#39;).submit()">08:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="09:00:00" data-planqueue-free-codemed="44" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;44&#39;;getEl(&#39;codetime&#39;).value=&#39;09:00:00&#39;;getEl(&#39;f1&#39;).submit()">09:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="10:00:00" data-planqueue-free-codemed="44" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;44&#39;;getEl(&#39;codetime&#39;).value=&#39;10:00:00&#39;;getEl(&#39;f1&#39;).submit()">10:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="11:00:00" data-planqueue-free-codemed="44" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;44&#39;;getEl(&#39;codetime&#39;).value=&#39;11:00:00&#39;;getEl(&#39;f1&#39;).submit()">11:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="12:00:00" data-planqueue-free-codemed="44" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;44&#39;;getEl(&#39;codetime&#39;).value=&#39;12:00:00&#39;;getEl(&#39;f1&#39;).submit()">12:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="13:00:00" data-planqueue-free-codemed="44" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;44&#39;;getEl(&#39;codetime&#39;).value=&#39;13:00:00&#39;;getEl(&#39;f1&#39;).submit()">13:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="14:00:00" data-planqueue-free-codemed="44" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;44&#39;;getEl(&#39;codetime&#39;).value=&#39;14:00:00&#39;;getEl(&#39;f1&#39;).submit()">14:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="15:00:00" data-planqueue-free-codemed="44" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;44&#39;;getEl(&#39;codetime&#39;).value=&#39;15:00:00&#39;;getEl(&#39;f1&#39;).submit()">15:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="16:00:00" data-planqueue-free-codemed="44" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;44&#39;;getEl(&#39;codetime&#39;).value=&#39;16:00:00&#39;;getEl(&#39;f1&#39;).submit()">16:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="17:00:00" data-planqueue-free-codemed="44" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;44&#39;;getEl(&#39;codetime&#39;).value=&#39;17:00:00&#39;;getEl(&#39;f1&#39;).submit()">17:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="18:00:00" data-planqueue-free-codemed="44" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;44&#39;;getEl(&#39;codetime&#39;).value=&#39;18:00:00&#39;;getEl(&#39;f1&#39;).submit()">18:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="19:00:00" data-planqueue-free-codemed="44" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;44&#39;;getEl(&#39;codetime&#39;).value=&#39;19:00:00&#39;;getEl(&#39;f1&#39;).submit()">19:00:00</button>
+</fieldset>
+<fieldset><legend>
+УЗИ (Лучевая диагностика)
+</legend>
+<button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="08:00:00" data-planqueue-free-codemed="3" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;3&#39;;getEl(&#39;codetime&#39;).value=&#39;08:00:00&#39;;getEl(&#39;f1&#39;).submit()">08:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="09:00:00" data-planqueue-free-codemed="3" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;3&#39;;getEl(&#39;codetime&#39;).value=&#39;09:00:00&#39;;getEl(&#39;f1&#39;).submit()">09:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="10:00:00" data-planqueue-free-codemed="3" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;3&#39;;getEl(&#39;codetime&#39;).value=&#39;10:00:00&#39;;getEl(&#39;f1&#39;).submit()">10:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="11:00:00" data-planqueue-free-codemed="3" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;3&#39;;getEl(&#39;codetime&#39;).value=&#39;11:00:00&#39;;getEl(&#39;f1&#39;).submit()">11:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="12:00:00" data-planqueue-free-codemed="3" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;3&#39;;getEl(&#39;codetime&#39;).value=&#39;12:00:00&#39;;getEl(&#39;f1&#39;).submit()">12:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="13:00:00" data-planqueue-free-codemed="3" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;3&#39;;getEl(&#39;codetime&#39;).value=&#39;13:00:00&#39;;getEl(&#39;f1&#39;).submit()">13:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="14:00:00" data-planqueue-free-codemed="3" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;3&#39;;getEl(&#39;codetime&#39;).value=&#39;14:00:00&#39;;getEl(&#39;f1&#39;).submit()">14:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="15:00:00" data-planqueue-free-codemed="3" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;3&#39;;getEl(&#39;codetime&#39;).value=&#39;15:00:00&#39;;getEl(&#39;f1&#39;).submit()">15:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="16:00:00" data-planqueue-free-codemed="3" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;3&#39;;getEl(&#39;codetime&#39;).value=&#39;16:00:00&#39;;getEl(&#39;f1&#39;).submit()">16:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="17:00:00" data-planqueue-free-codemed="3" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;3&#39;;getEl(&#39;codetime&#39;).value=&#39;17:00:00&#39;;getEl(&#39;f1&#39;).submit()">17:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="18:00:00" data-planqueue-free-codemed="3" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;3&#39;;getEl(&#39;codetime&#39;).value=&#39;18:00:00&#39;;getEl(&#39;f1&#39;).submit()">18:00:00</button><button type="button" class="buttonsmall" style="width:auto" data-planqueue-free-time="19:00:00" data-planqueue-free-codemed="3" data-planqueue-range="" onclick="getEl(&#39;param&#39;).value=&#39;writeinqueue&#39;;getEl(&#39;codemed&#39;).value=&#39;3&#39;;getEl(&#39;codetime&#39;).value=&#39;19:00:00&#39;;getEl(&#39;f1&#39;).submit()">19:00:00</button>
+</fieldset>
+</form>
+<input type="time" id="timebegin">
+<button type="button" onclick="test()">Оптимальные посещения</button>
+
+<div id="timeworkdebug" style="font-size:xx-small;width:100%">
+<hr>C:\shttps\www\cgi-bin\tcgi1.exe  
+10:57:54:016-(initBase:10:57:54:017-10:57:54:018)
+-10:57:54:019 (3) (sleep:0)
+(Pid:19652  80 KernelTime:46 UserTime:31)
+</div>
+</div>
+
+<script src='script.js'></script>
+
+<div id="rememberry__extension__root" style="all: unset;"></div></body></html>

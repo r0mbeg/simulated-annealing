@@ -1,0 +1,4645 @@
+var MetodCompareFindSelect=1; 
+var noshowclninfo=false; /* true - убирать данные о пациенте после переноса */
+var maxLengthDiag=9;     
+/* 
+   Перемкнные modeChar... определют возможность ввода только точки 
+   в 6 и 8 символах диагноза. 
+   True - ввод разрешен 
+   False - ввод запрещен ( допустим ввод цифр )
+*/
+var modeChar6DiagPoint=true;
+var modeChar8DiagPoint=true;
+var flagVerifyInnOgrn=true;
+var flagVerifySnils=true;
+var gField;
+var gFrame;
+var RusChars="ЙйЦцУуКкЕеНнГгШшЩщЗзХхЪъФфЫыВвАаПпРрОоЛлДдЖжЭэЯяЧчСсМмИиТтЬьБбЮю- Ёё";
+var LatChars="QqWwEeRrTtYyUuIiOoPpAaSsDdFfGgHhJjKkLlZzXxCcVvBbNnMm- ";
+var NumChars="1234567890";
+var TelChars="1234567890()+";
+var appEventKey=null;
+/* js-код вызываемый после переноса данных из населения */
+var afterPerenos=null;
+/* Новый режим поиска в select */
+var modeFindNew=true;
+/* Имя файла календаря 
+в shttps может находится в папке cgi-bin
+в apache в cgi-bin находится не может. Нужно указать ../calendar.htm и разместить
+в соответствующей папке calendar.htm
+*/
+var nameCalendar="calendar.htm";
+var nameCalendarNew="calendarnew.htm";
+
+var newModeModalDialog='N';
+var newModeWait='N';
+var iframeModalWin='iframeModalwin';
+var idEditModalWin='';
+var idViewModalWin='';
+var idDopModalWin='';
+var commandLineModalWun='';
+var modeFirstModalWin='Y'; //Первый запуск в фильтр добавлять из поля ввода
+var prefixAnswerModalWin='';
+var nameSprModalWin='';  //Имя справочника (при ред.амб.карты поле стат.талона)
+var afterDialogInputSpr=null; //Процедура запускаемая после закрытия окна 
+                              //dialogInputSpr в модальном и не модальном режиме
+var idElementFocus='';
+
+
+function getEl(id)
+{
+return document.getElementById(id);
+}
+
+function $(id)
+{
+return document.getElementById(id);
+}
+
+function myshowModalDialog(s1,s2,s3)
+{
+var s='';
+try
+{
+if (s2==null) {s2=""};
+if (s3==null) {s3=""};
+s=showModalDialog(s1,s2,s3);
+return s;
+}
+catch(e) {alert("myshowModalDialog: "+e);return ""};
+}
+
+
+function setActionHTTPS(nameForm)
+{
+f=document.getElementById(nameForm);
+if (f==null)
+   {
+   alert("Неизвестная форма "+nameForm);
+   return
+   }
+var newAction="https://"+location.hostname;
+if (location.port!="") {newAction=newAction+":"+location.port};
+newAction=newAction+location.pathname;
+if (location.search!="") {newAction=newAction+'?'+location.search};
+alert("Обратите внимание!\nСистема будет пытаться передать даные пациента "+
+      "по защищенному каналу с использованием протокола SSL \n ("+newAction+")");
+f.action=newAction;
+}
+
+function setActionHTTP(nameForm)
+{
+f=document.getElementById(nameForm);
+if (f==null)
+   {
+   alert("Неизвестная форма "+nameForm);
+   return
+   }
+var newAction="http://"+location.hostname;
+if (location.port!="") {newAction=newAction+":"+location.port};
+newAction=newAction+location.pathname;
+if (location.search!="") {newAction=newAction+'?'+location.search};
+f.action=newAction;
+}
+
+function resizeIFrame(nameFrame,delta)
+{
+var fr=document.getElementById(nameFrame);
+if (fr==null)
+   {
+   alert('Неизвестный фрейм '+nameFrame);
+   return
+   }
+var h=parseInt(fr.height);
+fr.height=h+delta;
+}
+
+function clearValue(name)
+{
+var i=document.getElementById(name);
+if (i!=null) {i.value=""};
+}
+
+function clearDogStr()
+{
+clearValue("dogstr");
+clearValue("viewdogstr");
+}
+
+function saveDogStr()
+{
+parent.oldDogStr="";
+parent.oldViewDogStr="";
+var i=document.getElementById("dogstr");
+if (i!=null) {parent.oldDogStr=i.value};
+var i=document.getElementById("viewdogstr");
+if (i!=null) {parent.oldViewDogStr=i.value};
+}
+
+function restoreDogStr()
+{
+var i=document.getElementById("dogstr");
+if (i!=null) {i.value=parent.oldDogStr};
+var i=document.getElementById("viewdogstr");
+if (i!=null) {i.value=parent.oldViewDogStr};
+}
+
+function setStud()
+{
+var dr=document.getElementById('dredit');
+var delim1 = dr.value.indexOf("/");
+var delim2 = dr.value.lastIndexOf("/");
+var yyyy = parseInt(dr.value.substring(delim2 + 1, dr.value.length),10);
+var c=document.getElementById('clnstud');
+if (c==null) return;
+var currentD=new Date();
+if ((currentD.getFullYear()-yyyy)>35)
+   {
+   c.value='2';
+   c.options[2].selected=true;
+   }
+}
+
+/********************************************************
+Функция возвращает Y координату элемента в текущем фрейме
+*********************************************************/
+
+function getElementPos(i)
+{
+var y=i.offsetHeight;
+var i1=i;
+while (i1) {
+   y+=i1.offsetTop;
+   i1=i1.offsetParent;
+   }
+return y
+}
+
+/********************************************************
+Функция возвращает X координату элемента в текущем фрейме
+*********************************************************/
+
+function getElementPosX(i)
+{
+var y=i.offsetWidth;
+var i1=i;
+while (i1) {
+   y+=i1.offsetLeft;
+   i1=i1.offsetParent;
+   }
+return y
+}
+
+
+/********************************************************
+”г­ЄжЁп гбв ­ ў«Ёў Ґв ўлб®вг ®Є­  ¤® н«Ґ¬Ґ­в 
+*********************************************************/
+
+
+/************************************
+   Begin validation routines
+************************************/
+
+function VerifyCharStr1InStr2(Str1,Str2){
+for (p=0; p<Str1.length ; p++) {
+    var oneChar=Str1.charAt(p);
+    if (Str2.indexOf(oneChar)<0) { return false}
+    }
+return true;
+}
+
+function VerifySnils(s)
+{
+if (!flagVerifySnils) {return true};
+if (s.length!=14) { return false }
+if (s.charAt(3)!="-") { return false }
+if (s.charAt(7)!="-") { return false }
+if (s.charAt(11)!=" ") { return false }
+if (NumChars.indexOf(s.charAt(0))<0)  { return false }
+if (NumChars.indexOf(s.charAt(1))<0)  { return false }
+if (NumChars.indexOf(s.charAt(2))<0)  { return false }
+if (NumChars.indexOf(s.charAt(4))<0)  { return false }
+if (NumChars.indexOf(s.charAt(5))<0)  { return false }
+if (NumChars.indexOf(s.charAt(6))<0)  { return false }
+if (NumChars.indexOf(s.charAt(8))<0)  { return false }
+if (NumChars.indexOf(s.charAt(9))<0)  { return false }
+if (NumChars.indexOf(s.charAt(10))<0)  { return false }
+if (NumChars.indexOf(s.charAt(12))<0)  { return false }
+if (NumChars.indexOf(s.charAt(13))<0)  { return false }
+sumSnils=parseInt(s.charAt(0))*9+parseInt(s.charAt(1))*8+parseInt(s.charAt(2))*7+
+         parseInt(s.charAt(4))*6+parseInt(s.charAt(5))*5+parseInt(s.charAt(6))*4+
+         parseInt(s.charAt(8))*3+parseInt(s.charAt(9))*2+parseInt(s.charAt(10))*1;
+sumSnils=sumSnils % 101;
+if (sumSnils==100) {sumSnils=0};
+if (s.charAt(12)!='0') 
+   {sumEnd=parseInt(s.charAt(12)+s.charAt(13))}
+else
+   {sumEnd=parseInt(s.charAt(13))};
+if (sumSnils!=sumEnd) {return false}
+return true
+}
+
+function VerifyInn(s){
+if (!flagVerifyInnOgrn) {return true};
+if (s.length!=10) {return false}
+if (NumChars.indexOf(s.charAt(0))<0)  { return false }
+if (NumChars.indexOf(s.charAt(1))<0)  { return false }
+if (NumChars.indexOf(s.charAt(2))<0)  { return false }
+if (NumChars.indexOf(s.charAt(3))<0)  { return false }
+if (NumChars.indexOf(s.charAt(4))<0)  { return false }
+if (NumChars.indexOf(s.charAt(5))<0)  { return false }
+if (NumChars.indexOf(s.charAt(6))<0)  { return false }
+if (NumChars.indexOf(s.charAt(7))<0)  { return false }
+if (NumChars.indexOf(s.charAt(8))<0)  { return false }
+if (NumChars.indexOf(s.charAt(9))<0)  { return false }
+sumInn=parseInt(s.charAt(0))*2+parseInt(s.charAt(1))*4+parseInt(s.charAt(2))*10+
+       parseInt(s.charAt(3))*3+parseInt(s.charAt(4))*5+parseInt(s.charAt(5))*9+
+       parseInt(s.charAt(6))*4+parseInt(s.charAt(7))*6+parseInt(s.charAt(8))*8;
+sumInn1=(Math.floor(sumInn/11))*11;
+sumInn=sumInn-sumInn1;
+if (sumInn==10) {sumInn=0};
+if (sumInn==parseInt(s.charAt(9))) { return true} else {return false}
+}
+
+function VerifyOGRN(s){
+if (!flagVerifyInnOgrn) {return true};
+if (s.length!=13) {return false}
+if (NumChars.indexOf(s.charAt(0))<0)  { return false }
+if (NumChars.indexOf(s.charAt(1))<0)  { return false }
+if (NumChars.indexOf(s.charAt(2))<0)  { return false }
+if (NumChars.indexOf(s.charAt(3))<0)  { return false }
+if (NumChars.indexOf(s.charAt(4))<0)  { return false }
+if (NumChars.indexOf(s.charAt(5))<0)  { return false }
+if (NumChars.indexOf(s.charAt(6))<0)  { return false }
+if (NumChars.indexOf(s.charAt(7))<0)  { return false }
+if (NumChars.indexOf(s.charAt(8))<0)  { return false }
+if (NumChars.indexOf(s.charAt(9))<0)  { return false }
+if (NumChars.indexOf(s.charAt(10))<0)  { return false }
+if (NumChars.indexOf(s.charAt(11))<0)  { return false }
+if (NumChars.indexOf(s.charAt(12))<0)  { return false }
+sumOGRN=parseInt(s.substr(0,12));
+sumOGRN1=(Math.floor(sumOGRN/11))*11;
+sumOGRN=sumOGRN-sumOGRN1;
+if (sumOGRN==10) {sumOGRN=0};
+if (sumOGRN==parseInt(s.charAt(12))) { return true} else {return false}
+}
+
+function gFieldFocus() {setTimeout("gField.focus();gField.select()",500)}
+
+// поле содержит телефон
+
+function isTel(){
+var inputStr = gField.value;
+if (inputStr.length == 0)
+   return true;
+if (inputStr.length == 10) {
+   gField.value='+7('+inputStr.charAt(0)+inputStr.charAt(1)+inputStr.charAt(2)+')'+
+                inputStr.charAt(3)+inputStr.charAt(4)+inputStr.charAt(5)+
+                inputStr.charAt(6)+inputStr.charAt(7)+
+                inputStr.charAt(8)+inputStr.charAt(9);
+   }
+if (!VerifyCharStr1InStr2(gField.value,TelChars))  
+   {gFieldFocus();alert("Выделенное поле содержит НЕПРАВИЛЬНЫЙ телефон");return false};
+return true
+}
+
+function isTelStrong(){
+var inputStr = gField.value;
+if (inputStr.length == 0)
+   return true;
+if (inputStr.length == 10) {
+   gField.value='+7('+inputStr.charAt(0)+inputStr.charAt(1)+inputStr.charAt(2)+')'+
+                inputStr.charAt(3)+inputStr.charAt(4)+inputStr.charAt(5)+
+                inputStr.charAt(6)+inputStr.charAt(7)+
+                inputStr.charAt(8)+inputStr.charAt(9);
+   }
+if (!VerifyCharStr1InStr2(gField.value,TelChars))  
+   {gFieldFocus();alert("Выделенное поле содержит НЕПРАВИЛЬНЫЙ телефон");return false};
+if (gField.value.length!=14) {gFieldFocus();alert("Длинна выделенного поля должна быть 14 символов");return false}
+return true;
+}
+
+
+// поле содержит СНИЛС
+
+function isSnils() {
+var inputStr = gField.value;
+if (inputStr.length == 0)
+    return true;
+if (inputStr.length == 11) {
+   gField.value=inputStr.charAt(0)+inputStr.charAt(1)+inputStr.charAt(2)+"-"+
+                inputStr.charAt(3)+inputStr.charAt(4)+inputStr.charAt(5)+"-"+
+                inputStr.charAt(6)+inputStr.charAt(7)+inputStr.charAt(8)+" "+
+                inputStr.charAt(9)+inputStr.charAt(10);
+   inputStr=gField.value;
+   }  
+if (VerifySnils(inputStr)){
+   return true;
+}else{
+   gFieldFocus();
+   alert("Выделенное поле coдержит НЕПРАВИЛЬНЫЙ снилс.");
+   return false;
+   }
+}
+
+// поле содержит ИНН организации
+
+function isInn() {
+var inputStr = gField.value;
+if (VerifyInn(inputStr)){
+   return true;
+}else{
+   gFieldFocus();
+   alert("Выделенное поле coдержит НЕПРАВИЛЬНЫЙ ИНН.");
+   return false;
+   }
+}
+
+// поле содержит ИНН организации
+
+function isOGRN() {
+var inputStr = gField.value;
+if (VerifyOGRN(inputStr)){
+   return true;
+}else{
+   gFieldFocus();
+   alert("Выделенное поле coдержит НЕПРАВИЛЬНЫЙ ОГРН.");
+   return false;
+   }
+}
+
+
+// поле содержит только символы русского алфавита
+
+function isRus() {
+   var inputStr = gField.value;
+   if (inputStr.length == 0)
+      return true;
+   if (VerifyCharStr1InStr2(inputStr,RusChars)){
+      gField.value = inputStr.toUpperCase();
+      return true;
+   }else{
+      gFieldFocus();
+      alert("Выделенное поле может coдержать только символы русского алфавита.");
+      return false;
+   }
+}
+
+// поле содержит только символы русского алфавита + * ?
+
+function isRusMask() {
+   var inputStr = gField.value;
+   if (inputStr.length == 0)
+      return true;
+   if (VerifyCharStr1InStr2(inputStr,RusChars+'*?')){
+      gField.value = inputStr.toUpperCase();
+      return true;
+   }else{
+      gFieldFocus();
+      alert("Выделенное поле может coдержать только символы русского алфавита, * или ?.");
+      return false;
+   }
+}
+
+
+// поле содержит только символы латинского алфавита алфавита
+
+function isLat() {
+   var inputStr = gField.value;
+   if (inputStr.length == 0)
+      return true;
+   if (VerifyCharStr1InStr2(inputStr,LatChars)){
+      gField.value = inputStr.toUpperCase();
+      return true;
+   }else{
+      gFieldFocus();
+      alert("Выделенное поле может coдержать только символы латинского алфавита.");
+      return false;
+   }
+}
+
+function isDiag(i){
+sDiag=gField.value;
+if (sDiag=="") { return true};
+if (sDiag.length>maxLengthDiag) {
+   gFieldFocus();
+   alert("Длинна кода диагноза не может быть больше "+maxLengthDiag+" символов.");
+   return false;
+   }
+if (sDiag.length<3) {
+   gFieldFocus();
+   alert("Длинна кода диагноза не может быть меньше 3 символов.");
+   return false;
+   }
+sDiag=rusToLatUpChar(sDiag.charAt(0))+sDiag.substring(1,200);
+sDiag=sDiag.toUpperCase();
+gField.value=sDiag;
+if (!VerifyCharStr1InStr2(sDiag.charAt(0),LatChars)) {
+   gFieldFocus();
+   alert("Код диагноза должен начинаться с латинской буквы");
+   return false
+   }
+if (!VerifyCharStr1InStr2(sDiag.charAt(1),NumChars)) {
+   gFieldFocus();
+   alert("Вторым символом кода диагноза должна быть цифра");
+   return false
+   }
+if (!VerifyCharStr1InStr2(sDiag.charAt(2),NumChars)) {
+   gFieldFocus();
+   alert("Третьим символом кода диагноза должна быть цифра");
+   return false
+   }
+if (sDiag.length>3) {
+   if (VerifyCharStr1InStr2(sDiag.charAt(3),NumChars)) {
+      sDiag=sDiag.substring(0,3)+"."+sDiag.substring(3,200);
+      gField.value=sDiag;
+      }
+   if (sDiag.charAt(3)!="."){
+       gFieldFocus();
+       alert("Четвертым символом кода диагноза должна быть точка");
+       return false
+      } 
+   }
+if (sDiag.length>4) {
+   if (!VerifyCharStr1InStr2(sDiag.charAt(4),NumChars)) {
+       gFieldFocus();
+       alert("Пятым символом кода диагноза должна быть цифра");
+       return false
+       }
+   }
+/*
+if (sDiag.length>5) {
+   if (VerifyCharStr1InStr2(sDiag.charAt(5),NumChars)) {
+      sDiag=sDiag.substring(0,5)+"."+sDiag.substring(5,200);
+      gField.value=sDiag;
+      }
+   if (sDiag.charAt(5)!="."){
+       gField.focus();
+       gField.select();
+       alert("Шестым символом кода диагноза должна быть точка");
+       return false
+      } 
+   }
+*/
+if (sDiag.length>5) 
+   {
+    if (modeChar6DiagPoint)
+      {
+      if (VerifyCharStr1InStr2(sDiag.charAt(5),NumChars)) {
+         sDiag=sDiag.substring(0,5)+"."+sDiag.substring(5,200);
+         gField.value=sDiag;
+         }
+      if (sDiag.charAt(5)!="."){
+         gFieldFocus();
+         alert("Шестым символом кода диагноза должна быть точка");
+         return false
+         } 
+      }
+   else
+      {
+       if (!VerifyCharStr1InStr2(sDiag.charAt(5),NumChars)) {
+           gFieldFocus();
+           alert("Шестым символом кода диагноза должна быть цифра");
+           return false
+           }
+      }
+   }
+if (sDiag.length>6) {
+   if (!VerifyCharStr1InStr2(sDiag.charAt(6),NumChars)) {
+       gFieldFfocus();
+       alert("Седьмым символом кода диагноза должна быть цифра");
+       return false
+       }
+   }
+if (sDiag.length>7) 
+   {
+    if (modeChar8DiagPoint)
+      {
+      if (VerifyCharStr1InStr2(sDiag.charAt(7),NumChars)) {
+         sDiag=sDiag.substring(0,7)+"."+sDiag.substring(7,200);
+         gField.value=sDiag;
+         }
+      if (sDiag.charAt(7)!="."){
+         gFieldFocus();
+         alert("Восьмым символом кода диагноза должна быть точка");
+         return false
+         } 
+      }
+   else
+      {
+       if (!VerifyCharStr1InStr2(sDiag.charAt(7),NumChars)) {
+           gFieldFocus();
+           alert("Восьмым символом кода диагноза должна быть цифра");
+           return false
+           }
+      }
+   }
+if (sDiag.length>8) {
+   if (!VerifyCharStr1InStr2(sDiag.charAt(8),NumChars)) {
+       gFieldFocus();
+       alert("Девятым символом кода диагноза должна быть цифра");
+       return false
+       }
+   }
+
+return true
+}
+
+
+// Список диагнозов через точку с запятой 
+function isListDiag(i){
+var sListDiag=gField.value.split(';');
+for (i=0;i<sListDiag.length;i++)
+{
+sDiag=sListDiag[i];
+if (sDiag=="") { continue };
+if (sDiag.length>maxLengthDiag) {
+   gFieldFocus();
+   alert("Длинна кода диагноза не может быть больше "+maxLengthDiag+" символов.");
+   return false;
+   }
+if (sDiag.length<3) {
+   gFieldFocus();
+   alert("Длинна кода диагноза не может быть меньше 3 символов.");
+   return false;
+   }
+sDiag=rusToLatUpChar(sDiag.charAt(0))+sDiag.substring(1,200);
+sDiag=sDiag.toUpperCase();
+gField.value=sDiag;
+if (!VerifyCharStr1InStr2(sDiag.charAt(0),LatChars)) {
+   gFieldFocus();
+   alert("Код диагноза должен начинаться с латинской буквы");
+   return false
+   }
+if (!VerifyCharStr1InStr2(sDiag.charAt(1),NumChars)) {
+   gFieldFocus();
+   alert("Вторым символом кода диагноза должна быть цифра");
+   return false
+   }
+if (!VerifyCharStr1InStr2(sDiag.charAt(2),NumChars)) {
+   gFieldFocus();
+   alert("Третьим символом кода диагноза должна быть цифра");
+   return false
+   }
+if (sDiag.length>3) {
+   if (VerifyCharStr1InStr2(sDiag.charAt(3),NumChars)) {
+      sDiag=sDiag.substring(0,3)+"."+sDiag.substring(3,200);
+      gField.value=sDiag;
+      }
+   if (sDiag.charAt(3)!="."){
+       gFieldFocus();
+       alert("Четвертым символом кода диагноза должна быть точка");
+       return false
+      } 
+   }
+if (sDiag.length>4) {
+   if (!VerifyCharStr1InStr2(sDiag.charAt(4),NumChars)) {
+       gFieldFocus();
+       alert("Пятым символом кода диагноза должна быть цифра");
+       return false
+       }
+   }
+if (sDiag.length>5) {
+   if (VerifyCharStr1InStr2(sDiag.charAt(5),NumChars)) {
+      sDiag=sDiag.substring(0,5)+"."+sDiag.substring(5,200);
+      gField.value=sDiag;
+      }
+   if (sDiag.charAt(5)!="."){
+       gFieldFocus();
+       alert("Шестым символом кода диагноза должна быть точка");
+       return false
+      } 
+   }
+if (sDiag.length>6) {
+   if (!VerifyCharStr1InStr2(sDiag.charAt(6),NumChars)) {
+       gFieldFocus();
+       alert("Седьмым символом кода диагноза должна быть цифра");
+       return false
+       }
+   }
+if (sDiag.length>7) {
+   if (VerifyCharStr1InStr2(sDiag.charAt(7),NumChars)) {
+      sDiag=sDiag.substring(0,7)+"."+sDiag.substring(7,200);
+      gField.value=sDiag;
+      }
+   if (sDiag.charAt(7)!="."){
+       gFieldFocus();
+       alert("Восьмым символом кода диагноза должна быть точка");
+       return false
+      } 
+   }
+if (sDiag.length>8) {
+   if (!VerifyCharStr1InStr2(sDiag.charAt(8),NumChars)) {
+       gFieldFocus();
+       alert("Девятым символом кода диагноза должна быть цифра");
+       return false
+       }
+   }
+sListDiag[i]=sDiag;
+}
+gField.value='';
+for (i=0;i<sListDiag.length;i++)
+   {
+    if (sListDiag[i]!='') 
+       {
+       if (gField.value!='') {gField.value+=';'};
+       gField.value+=sListDiag[i];
+       }
+   }
+
+return true
+}
+
+
+
+// length input field = maxLength
+
+function isMaxLength()
+   {
+    if ((gField.maxLength!=0)&&(gField.maxLength<1000)&&(gField.value.length!=gField.maxLength))
+       {
+        gFieldFocus();
+        alert('Текущее поле должно иметь длинну '+gField.maxLength+' символов.');
+        return false;
+       }
+    return isPositiveInteger();
+   }
+
+// input field is not empty
+function isNotEmpty() {
+   if (gField.value == "" || gField.value == null) {
+      gFieldFocus();
+      alert("Текущее поле не может быть пустым.");
+      return false;
+   }
+   gField.value = gField.value.toUpperCase();
+   return true;
+}
+
+// input value is a positive integer of any length
+function isPositiveInteger() {
+   var inputStr = gField.value;
+   if (inputStr.length == 0)
+      return true;
+   for (var p = 0; p < inputStr.length; p++) {
+      var oneChar = inputStr.charAt(p);
+      if (oneChar < "0" || oneChar > "9") {
+         gFieldFocus();
+         alert("Выделенное поле должно содержать целое положительное число.");
+         return false;
+      }
+   }
+   return true;
+}
+
+
+function isPositiveInteger0_100(){
+if (isPositiveInteger()==true) {
+   var inputStr = gField.value;
+   if (inputStr.length == 0)
+      return true;
+
+   if ((gField.value<0)||(gField.value>100)){
+      gFieldFocus();
+      alert("Выделенное поле должно содержать число от 0 до 100");
+      return false;
+      }
+   else
+      {
+      return true;
+      }
+   }
+else
+   return false;
+}
+
+
+// input value is a positive integer of any length
+function isDouble() {
+   var inputStr = gField.value;
+   if (inputStr.length == 0)
+      return true;
+   if (isNaN(inputStr)) {
+      gFieldFocus();
+      alert("Выделенное поле должно содержать число.");
+      return false;
+      } 
+   return true;
+}
+
+// Функция вывода сообщения об ошибке ввода даты
+function OutErrorDate(){
+      MsgError="Вы ввели выделенную дату в неправильном формате.\n\nВы можете вводить даты в формате день/месяц/год.\n\nНапример 24 декабря 1987 вводится как 24/12/1987";
+      gFieldFocus();
+      alert(MsgError);
+}
+
+// Функция вывода сообщения об ошибке ввода времени
+function OutErrorTime(){
+      MsgError="Вы ввели выделенное время в неправильном формате.\n\nВы можете вводить время в формате час:минута:секунда. \n\nНапример 12:45:10";
+      gFieldFocus();
+      alert(MsgError);
+}
+
+
+
+// проверка формата времени
+function isTimeFormat(){
+var inputStr = gField.value;
+if (inputStr.length == 0)
+      return true;
+if (inputStr.length==4) {
+   inputStr=inputStr.substr(0,2)+':'+inputStr.substr(2,2)+':00';
+   } 
+if (inputStr.length==5) {
+   inputStr=inputStr.substr(0,5)+':00';
+   } 
+if (inputStr.length==6) {
+   inputStr=inputStr.substr(0,2)+':'+inputStr.substr(2,2)+':'+
+            inputStr.substr(4,2);
+   } 
+if (inputStr.charAt(2)=='.') { 
+      inputStr=inputStr.substr(0,2)+':'+inputStr.substr(3) 
+      };
+if (inputStr.charAt(2)=='\\') { 
+      inputStr=inputStr.substr(0,2)+':'+inputStr.substr(3)
+      };
+if (inputStr.charAt(2)=='/') { 
+      inputStr=inputStr.substr(0,2)+':'+inputStr.substr(3)
+      };
+if (inputStr.charAt(5)=='.') { 
+      inputStr=inputStr.substr(0,5)+':'+inputStr.substr(6) 
+      };
+if (inputStr.charAt(5)=='\\') { 
+      inputStr=inputStr.substr(0,5)+':'+inputStr.substr(6)
+      };
+if (inputStr.charAt(5)=='/') { 
+      inputStr=inputStr.substr(0,5)+':'+inputStr.substr(6)
+      };
+var delim1 = inputStr.indexOf(":");
+var delim2 = inputStr.lastIndexOf(":");
+if (delim1 != -1 && delim1 == delim2) {
+   OutErrorTime();
+   return false;
+}
+if (delim1 != -1) {
+   var hour = parseInt(inputStr.substring(0,delim1),10);
+   var min = parseInt(inputStr.substring(delim1 + 1,delim2),10);
+   var sec = parseInt(inputStr.substring(delim2 + 1, inputStr.length),10);
+   } else {
+      OutErrorTime();
+      return false;
+}
+if (isNaN(hour) || isNaN(min) || isNaN(sec)) {
+      OutErrorTime();
+      return false;
+}
+if (hour< 0 || hour > 23) {
+   alert("Час должен быть в диапазоне от 0 до 23");
+   gFieldFocus();
+   return false;
+   }
+if (min< 0 || min > 59) {
+   alert("Минуты должны быть в диапазоне от 0 до 59");
+   gFieldFocus();
+   return false;
+   }
+if (sec< 0 || sec > 59) {
+   alert("Секунды должны быть в диапазоне от 0 до 59");
+   gFieldFocus();
+   return false;
+   }
+
+gField.value = hourMinSecFormat(hour)+":"+hourMinSecFormat(min)+":"+
+               hourMinSecFormat(sec);
+return true;
+}
+
+// check input date format
+function isDateFormat() {
+   var inputStr = gField.value;
+   var curDate=new Date();
+   var sDate=(curDate.getDate()+1).toString();
+   var sMonth=(curDate.getMonth()+1).toString();
+   var sYear=(curDate.getFullYear()).toString();
+   if (sMonth.length==1) {sMonth='0'+sMonth};
+   if (inputStr.length == 0)
+      return true;
+   if (inputStr=='0'){
+      inputStr=sDate+'/'+sMonth+'/'+sYear;
+      }
+   if (inputStr.length==1) {
+      inputStr='0'+inputStr+'/'+sMonth+'/'+sYear;
+      }
+   if (inputStr.length==2) {
+      inputStr=inputStr+'/'+sMonth+'/'+sYear;
+      }
+   if (inputStr.length==3) {
+      inputStr=inputStr.substr(0,2)+'/0'+inputStr.substr(2,1)+'/'+sYear;
+      }
+
+   if (inputStr.length==4) {
+      inputStr=inputStr.substr(0,2)+'/'+inputStr.substr(2,2)+'/'+sYear;
+      }; 
+   if (inputStr.length==6) {
+      inputStr=inputStr.substr(0,2)+'/'+inputStr.substr(2,2)+'/'+
+            inputStr.substr(4,2);
+      }; 
+   if (inputStr.charAt(2)=='.') { 
+      inputStr=inputStr.substr(0,2)+'/'+inputStr.substr(3) 
+      };
+   if (inputStr.charAt(2)=='\\') { 
+      inputStr=inputStr.substr(0,2)+'/'+inputStr.substr(3)
+      };
+   if (inputStr.charAt(5)=='.') { 
+      inputStr=inputStr.substr(0,5)+'/'+inputStr.substr(6)
+      };
+   if (inputStr.charAt(5)=='\\') { 
+      inputStr=inputStr.substr(0,5)+'/'+inputStr.substr(6) 
+      };
+   var delim1 = inputStr.indexOf("/");
+   var delim2 = inputStr.lastIndexOf("/");
+   if (delim1 != -1 && delim1 == delim2) {
+      // there is only one delimiter in the string
+      OutErrorDate();
+      return false;
+   }
+   if (delim1 != -1) {
+      // there are delimiters; extract component values
+      var dd = parseInt(inputStr.substring(0,delim1),10);
+      var mm = parseInt(inputStr.substring(delim1 + 1,delim2),10);
+      var yyyy = parseInt(inputStr.substring(delim2 + 1, inputStr.length),10);
+   } else {
+      // there are no delimiters; extract component values
+      OutErrorDate();
+      return false;
+   }
+   if (isNaN(mm) || isNaN(dd) || isNaN(yyyy)) {
+      // there is a non-numeric character in one of the component values
+      OutErrorDate();
+      return false;
+   }
+   if (mm < 1 || mm > 12) {
+      // month value is not 1 thru 12
+      alert("Месяц должен быть в диапазоне от 01 (Январь) до 12 (Декабрь).");
+      gFieldFocus();
+      return false;
+   }
+   if (dd < 1 || dd > 31) {
+      // date value is not 1 thru 31
+      alert("День должен быть в диапазоне от 1 до 31 (в зависимости от месяца и года).");
+      gFieldFocus();
+      return false;
+   }
+   if (yyyy < 100) {
+      // entered value is two digits, which we allow for 1923-2029
+      if (yyyy >= 23) {
+         yyyy += 1900;
+      } else {
+         yyyy += 2000;
+      }
+   }
+   if (!checkMonthLength(mm,dd)) {
+      gFieldFocus();
+      return false;
+   }
+   if (mm == 2) {
+      if (!checkLeapMonth(mm,dd,yyyy)) {
+         gFieldFocus();
+         return false;
+      }
+   }
+   gField.value = monthDayFormat(dd) + "/" + monthDayFormat(mm) + "/" + yyyy;
+   return true;
+}
+
+// Проверка даты на принадлежность диапазону:(текущая дата) - 
+//                                           (текущая дата-год)
+function isSmartDate() {
+if (isDateFormat()==true){
+   var inputStr = gField.value;
+   var delim1 = inputStr.indexOf("/");
+   var delim2 = inputStr.lastIndexOf("/");
+   var dd = parseInt(inputStr.substring(0,delim1),10);
+   var mm = parseInt(inputStr.substring(delim1 + 1,delim2),10);
+   var yyyy = parseInt(inputStr.substring(delim2 + 1, inputStr.length),10);
+   var curDate=new Date();
+   var inputDate=new Date(yyyy,mm-1,dd);
+   var countDay=(Date.parse(curDate)-Date.parse(inputDate))/1000/60/60/24;
+   if (countDay<0) {
+      alert("Дата НЕ может быть больше текущей.");
+      gFieldFocus();
+      return false;
+      }
+   if (countDay>365) {
+      alert("Дата слишком старая.");
+      gFieldFocus();
+      return false;
+      }
+   return true  }
+else
+{  return false }
+}
+
+/************************************************
+   Begin utility validation and support routines
+************************************************/
+
+// generic maximum string length checker (called by dispatched validation functions)
+function maxString(len) {
+   var inputStr = gField.value.toUpperCase();
+   if (inputStr.length > len) {
+      if (!confirm("This field is limited to " + len + " characters long. Should the system accept the first " + len + " characters of your entry, and ignore the rest?")) {
+         gFieldFocus();
+         return false;
+      }
+      inputStr = inputStr.substring(0,len);
+   }
+   gField.value = inputStr;
+   return true;
+}
+
+
+
+// check the entered month for too high a value
+function checkMonthLength(mm,dd) {
+   var months = new Array("","Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь");
+   if ((mm == 4 || mm == 6 || mm == 9 || mm == 11) && dd > 30) {
+      alert(months[mm] + " содержит только 30 дней.");
+      return false;
+   } 
+   return true;
+}
+
+// check the entered February date for too high a value 
+function checkLeapMonth(mm,dd,yyyy) {
+   if (yyyy % 4 > 0 && dd > 28) {
+      alert("Февраль " + yyyy + " года содержит 28 дней.");
+      return false;
+   } else if (dd > 29) {
+      alert("Февраль " + yyyy + " года содержит 29 дней.");
+      return false;
+   }
+   return true;
+}
+
+
+// insert insertString immediately before searchString
+function insertString(mainStr,searchStr,insertStr) {
+   var front = getFront(mainStr,searchStr);
+   var end = getEnd(mainStr,searchStr);
+   if (front != null && end != null) {
+      return front + insertStr + searchStr + end;
+   }
+   return null;
+}
+
+// remove deleteString
+function deleteString(mainStr,deleteStr) {
+   return replaceString(mainStr,deleteStr,"");
+}
+
+// replace searchString with replaceString
+function replaceString(mainStr,searchStr,replaceStr) {
+   var front = getFront(mainStr,searchStr);
+   var end = getEnd(mainStr,searchStr);
+   if (front != null && end != null) {
+      return front + replaceStr + end;
+   }
+   return null;
+}
+
+// convert month or day number to string, padding with leading zero if needed
+function monthDayFormat(val) {
+   if (isNaN(val) || val == 0) {
+      return "01";
+   } else if (val < 10) {
+      return "0" + val;
+   }
+   return "" + val;
+}
+
+// конвертировать час, мин., сек.
+function hourMinSecFormat(val) {
+   if (isNaN(val) || val == 0) {
+      return "00";
+   } else if (val < 10) {
+      return "0" + val;
+   }
+   return "" + val;
+}
+
+
+/******************************************
+   Begin validation dispatching mechanism
+******************************************/
+// validation function object constructor
+function dispatcher(validationFunc) {
+   this.doValidate = validationFunc;
+}
+var dispatchLookup = new Array
+dispatchLookup["isNotEmpty"] = new dispatcher(isNotEmpty);
+dispatchLookup["isPositiveInteger"] = new dispatcher(isPositiveInteger);
+dispatchLookup["isPositiveInteger0_100"] = new dispatcher(isPositiveInteger0_100);
+dispatchLookup["isDateFormat"] = new dispatcher(isDateFormat);
+dispatchLookup["isTimeFormat"] = new dispatcher(isTimeFormat);
+dispatchLookup["isDouble"] = new dispatcher(isDouble);
+dispatchLookup["isRus"] = new dispatcher(isRus);
+dispatchLookup["isRusMask"] = new dispatcher(isRusMask);
+dispatchLookup["isLat"] = new dispatcher(isLat);
+dispatchLookup["isSnils"] = new dispatcher(isSnils);
+dispatchLookup["isInn"] = new dispatcher(isInn);
+dispatchLookup["isOGRN"] = new dispatcher(isOGRN);
+dispatchLookup["isSmartDate"] = new dispatcher(isSmartDate);
+dispatchLookup["isDiag"] = new dispatcher(isDiag);
+dispatchLookup["isListDiag"] = new dispatcher(isListDiag);
+dispatchLookup["isMaxLength"] = new dispatcher(isMaxLength);
+dispatchLookup["isTel"] = new dispatcher(isTel);
+dispatchLookup["isTelStrong"] = new dispatcher(isTelStrong);
+
+// main validation function called by form event handlers
+function validate(frame, field, method) {
+   gFrame = frame;
+//   gField = field;
+   gField = eval("document.forms[0]." + field.name);
+   if ((gField==null)&&(document.forms.length>1))
+      {
+      gField = eval("document.forms[1]."+field.name);
+      }
+   var args = validate.arguments;
+   for (i = 2; i < args.length; i++) {
+      if (!dispatchLookup[args[i]].doValidate()) {
+         return false;
+      }
+   }
+   return true;
+}
+
+
+function validateNew(frame, field, method) {
+   gFrame = frame;
+   gField = field;
+   var args = validateNew.arguments;
+   for (i = 2; i < args.length; i++) {
+      if (!dispatchLookup[args[i]].doValidate()) {
+         return false;
+      }
+   }
+   return true;
+}
+
+function validateForm(f)
+{
+var i;
+for (i=0; i<f.elements.length; i++)
+    {
+     if (f.elements[i].onchange!=null) {if (!f.elements[i].onchange()) return false};
+    }
+return true;
+}
+
+function getNextElement(f, node) {
+var returnElement=null;
+var thisEndElement=false;
+   for (i=0; i<f.elements.length; i++)
+      {
+      if(f.elements[i]==node)
+         {
+         if(i==f.elements.length-1)
+            {
+            returnElement=f.elements[0];
+            thisEndElement=true;
+            }
+         else 
+            returnElement=f.elements[i+1];
+         }
+      }
+   return returnElement;
+}
+
+
+// функция обработки событий клавиатуры
+function bodyeventkey(evt) {
+evt=(evt) ? evt : ((window.event) ? window.event : null);
+elem=(evt.target) ? evt.target : evt.srcElement;
+if ((evt.keyCode==13) && ((elem.type=='text') || (elem.type=='select-one'))) 
+   {
+    try {evt.keyCode=9} catch(e) {};
+    try 
+    {
+    if (evt.keyCode!=9) 
+       {
+       if (elem.form!=null)
+          {
+          var next=getNextElement(elem.form,elem);
+          next.focus();
+          }
+       evt.preventDefault();
+       }
+    }
+    catch(e) {}
+   }
+if (appEventKey!=null) {return appEventKey(evt)} else {return true};
+}
+
+function appEventKeyNasel(evt){
+if ((evt.keyCode==118)&&(!evt.ctrlKey)) {
+   i=document.getElementById('buttonfindfirst');
+   if (i!=null) {i.click()};
+   return false;
+   }
+if ((evt.keyCode==118)&&(evt.ctrlKey)) {
+   i=document.getElementById('buttonfindnext');
+   if (i!=null) {i.click()};
+   return false;
+   }
+if (evt.keyCode==119) {
+   i=document.getElementById('buttonedit');
+   if (i!=null) {i.click()};
+   return false;
+   }
+if (evt.keyCode==120) {
+   i=document.getElementById('buttonprint');
+   if (i!=null) {i.click()};
+   return false;
+   }
+if ((evt.keyCode==45)&&(!evt.shiftKey)) {
+   i=document.getElementById('buttonappend');
+   if (i!=null) {i.click()};
+   return false;
+   }
+if (evt.keyCode==46) {
+   i=document.getElementById('buttonclear');
+   if (i!=null) {i.click()};
+   return false;
+   }
+return true;
+}
+
+function quitOff(evt){
+evt = (evt) ? evt : window.event;
+var msg='При таком способе выхода данные, введенные на этой странице, '+
+         'НЕ БУДУТ сохранены и, возможно, НЕ БУДУТ доступны в дальнейшем.';   
+evt.returnValue=msg
+return msg
+}
+
+function setQuitOn()
+{
+self.onbeforeunload=null;
+}
+
+function quitOn(){
+}
+
+
+function addCookie(szName,szValue,dtDaysExpires)
+{
+  var dtExpires = new Date();
+  var dtExpiryDate = "";
+   dtExpires.setTime(dtExpires.getTime() +
+    dtDaysExpires * 24 * 60 * 60 * 1000);
+   dtExpiryDate = dtExpires.toGMTString();
+   document.cookie =
+    szName + "=" + szValue + "; expires=" +
+    dtExpiryDate;
+}
+ function findCookie(szName)
+{
+  var i = 0;
+  var nStartPosition = 0;
+  var nEndPosition = 0;
+  var szCookieString = document.cookie;
+   while (i <= szCookieString.length)
+  {
+    nStartPosition = i;
+    nEndPosition = nStartPosition + szName.length;
+     if(szCookieString.substring( nStartPosition,nEndPosition) == szName)
+    {
+      if (document.cookie.charAt(nEndPosition)==';'){
+         return "";
+         break;
+         }
+      nStartPosition = nEndPosition + 1;
+      nEndPosition = document.cookie.indexOf(";",nStartPosition);
+       if(nEndPosition < nStartPosition)
+        nEndPosition = document.cookie.length;
+       return document.cookie.substring( nStartPosition,nEndPosition);
+      break;
+    }
+    i++;
+  }
+  return "";
+}
+ function removeCookie(szName)
+{
+  var dtExpires = new Date();
+  dtExpires.setTime(dtExpires.getTime() - 1);
+   var szValue = findCookie(szName);
+   document.cookie = szName + "=" + szValue +
+    "; expires=" + dtExpires.toGMTString();
+}
+ function loadCookie(cookieStr)
+{
+oneCookies=cookieStr.split(";");
+for (i=1;i<=oneCookies.length;i++) 
+    {
+     oc=oneCookies[i-1].split("=");
+     addCookie(oc[0],oc[1],10);
+    }
+} 
+
+ function ChangeBackground(id,color1,color2){
+ var i=document.getElementById(id);
+ var iTypeRezerv=document.getElementById('typerezerv');
+ if (i.style.backgroundColor==color2){
+     i.setAttribute('data-createqueue-rezerve',iTypeRezerv.value);
+     i.style.backgroundColor=color1
+     }
+ else{
+     i.setAttribute('data-createqueue-rezerve','');
+     i.style.backgroundColor=color2
+     }
+}
+
+function getColorRezerv()
+{
+var nameColor='cyan';
+i=document.getElementById('typerezerv');
+if (i!=null)
+   {
+   if (i.value=='S') {nameColor='salmon'};
+   if (i.value=='R') {nameColor='pink'};
+   if (i.value=='T') {nameColor='orange'};
+   if (i.value=='L') {nameColor='plum'};
+   if ((i.value!='')&&(i.value!='S')&&(i.value!='R')&&(i.value!='T')&&(i.value!='L')) {nameColor='red'};
+   }
+return nameColor;
+}
+
+ function AddInValueString(SubStr,F){
+ var ResultStr="";
+ if (F.value==""){
+    ResultStr=SubStr
+    }
+ else{
+    var arrayStr=F.value.split(",");
+    var n=0;
+    var existNomer=-1;
+    for (n=0;n<arrayStr.length;n++)
+        {
+        if (arrayStr[n].substr(0,5)==SubStr.substr(0,5)) {existNomer=n};
+        }
+    if (existNomer>=0) {arrayStr.splice(existNomer,1)};
+    if (existNomer==-1) 
+       {
+        arrayStr[arrayStr.length]=SubStr;
+       };
+    arrayStr.sort();
+    ResultStr=arrayStr.join(",");
+    }
+ return ResultStr;
+ }
+
+function compareInFindSelect(s1,s2){
+if (MetodCompareFindSelect==1)
+   {
+   if (s1.indexOf(s2)>=0) {
+      return true 
+      }
+   else
+      {
+      return false
+      }
+   }
+else
+   {
+   if (s1.indexOf(s2)==0) {
+      return true 
+      }
+   else
+      {
+      return false
+      }
+   }
+}
+
+function findSelect(nameSelect,nameField,mode){
+var i1=document.getElementById(nameSelect);
+if (i1==null)
+   {
+   alert('Неопределен объект '+nameSelect);
+   return;
+   }
+var i2=document.getElementById(nameField);
+if (i2==null)
+   {
+   alert('Неопределен объект '+nameField);
+   return;
+   }
+if ((mode=="f") || (mode==""))
+   {
+   if (mode=="f") {nbegin=0} else {nbegin=i1.selectedIndex+1};
+   var findStr=i2.value;
+   findStr=findStr.toLocaleUpperCase();
+   for (i=nbegin;i<i1.length;i++)
+       {
+       name=i1.options[i].text;
+       name=name.toLocaleUpperCase();
+       if (compareInFindSelect(name,findStr)) 
+              {
+              i1.selectedIndex=i;
+              return;
+              }
+       }
+    }
+if (mode=="p")
+   {
+   var nbegin=i1.selectedIndex-1;
+   var findStr=i2.value;
+   findStr=findStr.toLocaleUpperCase();
+   for (i=nbegin;i>=0;i--)
+       {
+       name=i1.options[i].text;
+       name=name.toLocaleUpperCase();
+       if (compareInFindSelect(name,findStr))
+          {
+          i1.selectedIndex=i;
+          return;
+          }
+       }
+    }
+alert("Строка не найдена");
+}
+
+function maxFindNew(nameSpan,nameSelect,nameField){
+var iFieldSelect=document.getElementById(nameSelect);
+if (iFieldSelect==null)
+   {
+   alert('Неопределен объект '+nameSelect);
+   return;
+   }   
+var i=document.getElementById(nameSpan+'Abs');
+if (i==null)
+   {
+   alert('Неопределен объект '+nameSpan+'Abs');
+   return;
+   }
+i.innerHTML="";
+i.innerHTML+="<input class='INFO' title=\"Строка поиска\" type=\"text\" size=\"10\" id=\""+nameField+"\" onkeyup=\"if (event.keyCode!=27) {findSelect('"+nameSelect+"','"+nameField+"','f')}\">&nbsp;";  
+i.innerHTML+="<button type='button' class='BUTTONSMALL' style='width:auto' title=\"Найти первого\" onclick=\"findSelect('"+nameSelect+"','"+nameField+"','f')\">></button>&nbsp;";
+i.innerHTML+="<button type='button' class='BUTTONSMALL' style='width:auto' title=\"Найти следующего\" onclick=\"findSelect('"+nameSelect+"','"+nameField+"','')\">>></button>&nbsp;";
+i.innerHTML+="<button type='button' class='BUTTONSMALL' style='width:auto' title=\"Найти предыдущего\" onclick=\"findSelect('"+nameSelect+"','"+nameField+"','p')\"><</button>&nbsp;";
+i.innerHTML+="<button type='button' class='BUTTONSMALL' style='width:auto' title=\"Очистить\" onclick=\"getEl(\'"+nameSelect+"\').value=\'\' \">0</button>&nbsp;";
+i.innerHTML+="<button type='button' class='BUTTONSMALL' style='width:auto' title=\"Свернуть поиск\" onclick=\"minFind('"+nameSpan+"','"+nameSelect+"','"+nameField+"');makeChange('"+nameSelect+"')\">X</button>";
+i.style.position='absolute';
+i.style.borderRadius='5px';
+i.style.top=getElementPos(iFieldSelect)+5+'px';
+i.style.left=getElementPosX(iFieldSelect)-iFieldSelect.offsetWidth+'px';
+var w=iFieldSelect.offsetWidth;
+if (w<300) {w=300};
+i.style.width=w+'px';
+i.style.backgroundColor='white';
+i.style.border='black solid 1px';
+i.style.padding='3px';
+var iField=document.getElementById(nameField);
+iField.focus();
+iField.select();
+}
+
+function makeChange(nameSelect)
+{
+var iFieldSelect=document.getElementById(nameSelect);
+if (iFieldSelect==null)
+   {
+   alert('Неопределен объект '+nameSelect);
+   return;
+   }   
+if (iFieldSelect.onchange) {iFieldSelect.onchange()};
+}
+
+function minFindNew(nameSpan,nameSelect,nameField){
+i=document.getElementById(nameSpan);
+if (i!=null) 
+    {
+    i.style.position='static';
+    i.style.width='';
+    i.style.height='';
+    i.style.top='';
+    i.style.left='';
+    i.style.border='';
+    i.style.backgroundColor='transparent';
+    var addHtml='<nobr>&nbsp;<button type="BUTTON" class="BUTTONSMALL" style="width:auto" title="Свернуть или развернуть поиск" onclick="minMaxFind(\''+nameSpan+'\',\''+nameSelect+'\',\''+nameField+'\');return false">?</button>';
+    addHtml+='<span id="'+i.id+'Abs" onkeydown="if (event.keyCode==27) {minFindNew(\''+nameSpan+'\',\''+nameSelect+'\',\''+nameField+'\')}"></span></nobr>';
+    i.innerHTML=addHtml;
+    i=document.getElementById(nameSelect);
+    if (i!=null)
+       { 
+       try
+       {
+       i.focus();
+       }
+       catch (e) {};
+       }
+    }
+else
+    {
+    alert("Не определена переменная "+nameSpan);
+    }
+}
+
+function minMaxFind(nameSpan,nameSelect,nameField)
+{
+var i=document.getElementById(nameSpan+'Abs');
+if (i==null)
+   {
+   alert('Неопределен объект '+nameSpan+'Abs');
+   return;
+   }
+if (i.innerHTML=='')
+   maxFindNew(nameSpan,nameSelect,nameField)
+else
+   minFindNew(nameSpan,nameSelect,nameField)
+}
+
+function maxFind(nameSpan,nameSelect,nameField)
+{
+if (modeFindNew)
+   {
+   maxFindNew(nameSpan,nameSelect,nameField);
+   return;
+   }
+var iFieldSelect=document.getElementById(nameSelect);
+if (iFieldSelect==null)
+   {
+   alert('Неопределен объект '+nameSelect);
+   return;
+   }   
+var i=document.getElementById(nameSpan);
+if (i==null)
+   {
+   alert('Неопределен объект '+nameSpan);
+   return;
+}
+i.innerHTML="";
+i.innerHTML+="<input class='INFOSELECT' title=\"Строка поиска\" type=\"text\" size=\"10\" id=\""+nameField+"\" onkeyup=\"findSelect('"+nameSelect+"','"+nameField+"','f')\">";  
+i.innerHTML+="<button type='button' class='INFOSELECT' title=\"Найти первого\" onclick=\"findSelect('"+nameSelect+"','"+nameField+"','f')\">></button>&nbsp;";
+i.innerHTML+="<button type='button' class='INFOSELECT' title=\"Найти следующего\" onclick=\"findSelect('"+nameSelect+"','"+nameField+"','')\">>></button>&nbsp;";
+i.innerHTML+="<button type='button' class='INFOSELECT' title=\"Найти предыдущего\" onclick=\"findSelect('"+nameSelect+"','"+nameField+"','p')\"><</button>&nbsp;";
+i.innerHTML+="<button type='button' class='INFOSELECT' title=\"Свернуть поиск\" onclick=\"minFind('"+nameSpan+"','"+nameSelect+"','"+nameField+"');makeChange('"+nameSelect+"')\">X</button>";
+var iField=document.getElementById(nameField);
+iField.focus();
+iField.select();
+}
+
+
+function minFind(nameSpan,nameSelect,nameField)
+{
+if (modeFindNew) 
+   {
+   minFindNew(nameSpan,nameSelect,nameField);
+   return
+   }
+i=document.getElementById(nameSpan);
+if (i!=null) 
+   {
+   i.innerHTML="<button class='INFOSELECT' style='border:none' title=\"Развернуть поиск\" onclick=\"maxFind('"+nameSpan+"','"+nameSelect+"','"+nameField+"')\"><img src='/images/getspr.bmp'></button>"
+   i.scrollIntoView();
+   }
+else
+   {
+   alert("Не определена переменная "+nameSpan);
+   }
+}
+
+
+
+
+function IncField(name){
+i=document.getElementById(name);
+if (i==null){
+   alert('Неопределен объект '+name);
+   return;
+   }
+ii=parseInt(i.value);
+if (ii!=NaN) {i.value=ii+1};
+}
+
+function DecField(name){
+i=document.getElementById(name);
+if (i==null){
+   alert('Неопределен объект '+name);
+   return;
+   }
+ii=parseInt(i.value);
+if ((ii!=NaN)&&(ii>=1)) {i.value=ii-1};
+}
+
+function rusToLatUpChar(charone){
+switch (charone){
+       case "Й": return "Q";       case "й": return "Q";
+       case "Ц": return "W";       case "ц": return "W";
+       case "У": return "E";       case "у": return "E";
+       case "К": return "R";       case "к": return "R";
+       case "Е": return "T";       case "е": return "T";
+       case "Н": return "Y";       case "н": return "Y";
+       case "Г": return "U";       case "г": return "U";
+       case "Ш": return "I";       case "ш": return "I";
+       case "Щ": return "O";       case "щ": return "O";
+       case "З": return "P";       case "з": return "P";
+       case "Ф": return "A";       case "ф": return "A";
+       case "Ы": return "S";       case "ы": return "S";
+       case "В": return "D";       case "в": return "D";
+       case "А": return "F";       case "а": return "F";
+       case "П": return "G";       case "п": return "G";
+       case "Р": return "H";       case "р": return "H";
+       case "О": return "J";       case "о": return "J";
+       case "Л": return "K";       case "л": return "K";
+       case "Д": return "L";       case "д": return "L";
+       case "Я": return "Z";       case "я": return "Z";
+       case "Ч": return "X";       case "ч": return "X";
+       case "С": return "C";       case "с": return "C";
+       case "М": return "V";       case "м": return "V";
+       case "И": return "B";       case "и": return "B";
+       case "Т": return "N";       case "т": return "N";
+       case "Ь": return "M";       case "ь": return "M";
+       }
+return charone;
+}
+
+function rusToRusUpChar(charone){
+switch (charone){
+       case "й": return "Й";
+       case "ц": return "Ц";
+       case "у": return "У";
+       case "к": return "К";
+       case "е": return "Е";
+       case "н": return "Н";
+       case "г": return "Г";
+       case "ш": return "Ш";
+       case "щ": return "З";
+       case "з": return "З";
+       case "х": return "Х";
+       case "ъ": return "Ъ";
+       case "ф": return "ф";
+       case "ы": return "Ы";
+       case "в": return "В";
+       case "а": return "А";
+       case "п": return "П";
+       case "р": return "Р";
+       case "о": return "О";
+       case "л": return "Л";
+       case "д": return "Д";
+       case "ж": return "Ж";
+       case "э": return "Э";
+       case "я": return "Я";
+       case "ч": return "Ч";
+       case "с": return "С";
+       case "м": return "М";
+       case "и": return "И";
+       case "т": return "Т";
+       case "ь": return "Ь";
+       case "б": return "Б";
+       case "ю": return "Ю";
+       }
+//charone="";
+return charone;
+}
+
+function rusToLatUp(name){
+i1=document.getElementById(name);
+if (i1==null){
+   alert('Неопределен объект '+name);
+   return;
+   }
+for (i=0;i<i1.value.length;i++){
+     i1.value=i1.value.slice(0,i)+rusToLatUpChar(i1.value.charAt(i))+i1.value.slice(i+1);
+     }
+}
+
+function rusToRusUp(name){
+i1=document.getElementById(name);
+if (i1==null){
+   alert('Неопределен объект '+name);
+   return;
+   }
+for (i=0;i<i1.value.length;i++){
+     i1.value=i1.value.slice(0,i)+rusToRusUpChar(i1.value.charAt(i))+i1.value.slice(i+1);
+     }
+}
+
+function serPasp(nametd,nameser){
+itd=document.getElementById(nametd);
+if (itd==null){
+   alert('Неопределен объект '+nametd);
+   return;
+   }
+iser=document.getElementById(nameser);
+if (iser==null){
+   alert('Неопределен объект '+nameser);
+   return;
+   }
+typedoc=new String(itd.options[itd.selectedIndex].value);
+if ((typedoc!='П')&&(typedoc!='Р')&&(typedoc!='п')&&(typedoc!='р')) { return };
+nsred=iser.value.indexOf("-");
+if (nsred<0) {nsred=iser.value.length};
+for (i=0;i<nsred;i++){
+     iser.value=iser.value.slice(0,i)+rusToLatUpChar(iser.value.charAt(i))+iser.value.slice(i+1);
+     }
+for (i=nsred+1;i<iser.value.length;i++){
+     iser.value=iser.value.slice(0,i)+rusToRusUpChar(iser.value.charAt(i))+iser.value.slice(i+1);
+     }
+}
+
+// Функция устанвливает активным элемент в nameSelect, значение которого
+// находится в cookie с именем nameCookie
+
+function setSelect(nameSelect,nameCookie){
+s=document.getElementById(nameSelect);
+if (s==null){
+   alert('Неопределен объект '+nameSelect);
+   return;
+   }
+value=findCookie(nameCookie);
+for (i=0;i<s.options.length;i++){
+    if (s.options[i].value==value) {s.options[i].select=true;s.selectedIndex=i}
+    }
+}
+
+
+
+//
+// Увеличивает поле дата на count дней 
+//                                           
+function incDateDays(nameD1,nameD2,Count) {
+var idD1=document.getElementById(nameD1);
+if (idD1==null){
+   alert('Неопределен объект '+nameD1);
+   return;
+   }
+var idD2=document.getElementById(nameD2);
+if (idD2==null){
+   alert('Неопределен объект '+nameD2);
+   return;
+   }
+if (idD1.value=="") {return};
+var inputStr=idD1.value;
+var delim1 = inputStr.indexOf("/");
+var delim2 = inputStr.lastIndexOf("/");
+var dd = parseInt(inputStr.substring(0,delim1),10);
+var mm = parseInt(inputStr.substring(delim1 + 1,delim2),10);
+var yyyy = parseInt(inputStr.substring(delim2 + 1, inputStr.length),10);
+var date1=new Date(Date.UTC(yyyy,mm-1,dd,0,0,0,0));
+var date2=new Date(Date.parse(date1)+Count*1000*60*60*24);
+var year=date2.getFullYear().toString();
+var month=(date2.getMonth()+1).toString();
+var day=date2.getDate().toString();
+if (month.length==1) {month='0'+month};
+if (day.length==1) {day='0'+day};
+idD2.value=day+'/'+month+'/'+year;
+}
+
+
+//
+// Устанавливает количество дней между d1 и d2 в count 
+//                                           
+function myGetCountDay(nameD1,nameD2,nameCount) {
+var idD1=document.getElementById(nameD1);
+if (idD1==null){
+   alert('Неопределен объект '+nameD1);
+   return;
+   }
+var idD2=document.getElementById(nameD2);
+if (idD2==null){
+   alert('Неопределен объект '+nameD2);
+   return;
+   }
+var idCount=document.getElementById(nameCount);
+if (idCount==null){
+   alert('Неопределен объект '+nameCount);
+   return;
+   }
+if ((idD1.value=="")||(idD2.value=="")) {return};
+var inputStr=idD1.value;
+var delim1 = inputStr.indexOf("/");
+var delim2 = inputStr.lastIndexOf("/");
+var dd = parseInt(inputStr.substring(0,delim1),10);
+var mm = parseInt(inputStr.substring(delim1 + 1,delim2),10);
+var yyyy = parseInt(inputStr.substring(delim2 + 1, inputStr.length),10);
+var date1=new Date(Date.UTC(yyyy,mm-1,dd,0,0,0,0));
+inputStr=idD2.value;
+delim1 = inputStr.indexOf("/");
+delim2 = inputStr.lastIndexOf("/");
+dd = parseInt(inputStr.substring(0,delim1),10);
+mm = parseInt(inputStr.substring(delim1 + 1,delim2),10);
+yyyy = parseInt(inputStr.substring(delim2 + 1, inputStr.length),10);
+var date2=new Date(Date.UTC(yyyy,mm-1,dd,0,0,0,0));
+var countDay=(Date.parse(date2)-Date.parse(date1))/1000/60/60/24;
+idCount.value=countDay;
+}
+//
+// Устанавливает количество дней больничного листа между d1 и d2 в count 
+// Это параметр равен количеству дней + 1
+//                                           
+function getCountDayBl(nameD1,nameD2,nameCount) {
+var idCount=document.getElementById(nameCount);
+if (idCount==null){
+   alert('Неопределен объект '+nameCount);
+   return;
+   }
+idD1=document.getElementById(nameD1);
+idD2=document.getElementById(nameD2);
+if ((idD1!=null)&&(idD2!=null))
+   {
+   if ((idD1.value!="")&(idD2.value!=""))
+      {
+      myGetCountDay(nameD1,nameD2,nameCount);  
+      idCount.value=parseInt(idCount.value,10)+1;
+      }
+   else
+      {
+      idCount.value="";
+      }
+   }
+if (idCount.value<0) {alert("Неправильный диапазон дат") }
+}
+
+//
+//При работе с БЛ устанавливает начальные дата
+//
+
+function setDateBeginBl1(v)
+{
+var i=document.getElementById('d1');
+if (i!=null) {if (i.value=='') {i.value=v}};
+var i=document.getElementById('dpr1');
+if (i!=null) {if (i.value=='') {i.value=v}};
+}
+function setDateBeginBl2(v)
+{
+var i=document.getElementById('ds');
+if (i!=null) {if (i.value=='') {i.value=v}};
+var i=document.getElementById('dpr1');
+if (i!=null) {if (i.value=='') {i.value=v}};
+}
+
+function setDateBeginBl3(v)
+{
+var i=document.getElementById('ds');
+if (i!=null) 
+   {
+    if (i.value=='') 
+       {i.value=v}
+    else
+       {if (i.value!=v) 
+           {if (confirm('Обновить дату выдачи с '+i.value+' на '+v+'?')) {i.value=v}}
+       }
+   };
+var i=document.getElementById('d1');
+if (i!=null) 
+   {
+    if (i.value=='') 
+       {i.value=v}
+    else
+       {if (i.value!=v) 
+           {if (confirm('Обновить начальную дату с '+i.value+' на '+v+'?')) {i.value=v}}
+       }
+   };
+}
+
+function setDateEndBl1()
+{
+var i1=document.getElementById('dprend1');
+var i2=document.getElementById('dprend2');
+var i3=document.getElementById('dprend3');
+var strend='';
+if (i3!=null) {strend=i3.value};
+if ((strend=='')&&(i2!=null)) {strend=i2.value};
+if ((strend=='')&&(i1!=null)) {strend=i1.value};
+var i=document.getElementById('d2');
+if (i!=null) 
+   {
+   if (i.value=='') 
+      {i.value=strend;i.onchange()} 
+   else
+      {
+      if (i.value!=strend) 
+         {
+          if (confirm('Обновить дату окончания БЛ с '+i.value+' на '+strend+' ?')) {i.value=strend;i.onchange()};
+         }
+      }
+   }
+}
+//
+// Установка даты выхода на работу в БЛ
+//
+function setDateGo()
+{
+var i2=document.getElementById('d2');
+var ig=document.getElementById('dg');
+if ((i2!=null)&&(ig!=null))
+   {
+    if ((ig.value=='')||(confirm('Обновить данные о дате выхода на работу?'))) {incDateDays('d2','dg',1)}
+   }
+}
+
+//
+// Установка врачей открывшего и закрывшего БЛ
+//
+function setMedicBeginEnd()
+{
+var im1=document.getElementById('prmedic1');
+var im2=document.getElementById('prmedic2');
+var im3=document.getElementById('prmedic3');
+var medBegin='';var medEnd='';
+if (im1!=null) medBegin=im1.value;
+if (im3!=null) medEnd=im3.value;
+if ((im2!=null)&&(im2.value!='')&&(medEnd=='')) {medEnd=im2.value};
+if ((im1!=null)&&(im1.value!='')&&(medEnd=='')) {medEnd=im1.value};
+var imb=document.getElementById('codemedbegin');
+var ime=document.getElementById('codemedend');
+if (imb!=null)
+   {
+    if (imb.value=='') 
+       {imb.value=medBegin}
+    else 
+       {
+       if (imb.value!=medBegin)
+          {
+           if (confirm('Обновить данные о враче, открывшем БЛ?')) { imb.value=medBegin}
+          }
+       }
+   }
+if (ime!=null)
+   {
+    if (ime.value=='') 
+       {ime.value=medEnd}
+    else 
+       {
+       if (ime.value!=medEnd)
+          {
+           if (confirm('Обновить данные о враче, закрывшем БЛ?')) { ime.value=medEnd}
+          }
+       }
+   }
+
+}
+//
+// Обновить данные о БЛ
+//
+
+function refreshBL()
+{
+var v=document.getElementById('dpr1').value;
+setDateBeginBl3(v);
+setDateEndBl1();
+setMedicBeginEnd();
+document.getElementById('calcday').click();
+}
+
+
+function SwapNext(){
+// list - список через ; всех используемых id 
+i=document.getElementById("list");
+if (i==null){
+   alert("Неопределен элемент list");
+   return
+   }
+l=i.value.split(";");
+// Если последний элемент не пустой
+i1=document.getElementById(l[l.length-1]);
+if (i1.value!=""){
+   alert("Сдвиг невозможен.");
+   return
+   }
+
+i1=document.getElementById(l[0]);
+PrevValue=i1.value;
+i1.value="";
+for (p=1;p<=(l.length-1);p++){
+    i1=document.getElementById(l[p]);
+    if (i1!=null){
+       NextValue=i1.value;
+       i1.value=PrevValue;
+       PrevValue=NextValue;
+       }
+    }
+
+}
+
+function SwapPrev(){
+// list - список через ; всех используемых id 
+i=document.getElementById("list");
+if (i==null){
+   alert("Неопределен элемент list");
+   return
+   }
+l=i.value.split(";");
+// Если первый элемент непустой
+i1=document.getElementById(l[0]);
+if (i1.value!=""){
+   alert("Сдвиг невозможен.");
+   return
+   }
+i1=document.getElementById(l[l.length-1]);
+PrevValue=i1.value;
+i1.value="";
+for (p=(l.length-2);p>=0;p--){
+    i1=document.getElementById(l[p]);
+    if (i1!=null){
+       NextValue=i1.value;
+       i1.value=PrevValue;
+       PrevValue=NextValue;
+       }
+    }
+
+}
+
+function ClearSwap(nameSwap){
+iSwap=document.getElementById(nameSwap);
+if (iSwap.value!=""){
+    i=document.getElementById(iSwap.value);
+    if (i!=null){ i.className="info" };
+    iSwap.value="";
+    } 
+}
+
+function SwapPosCuvet(idPos,nameSwap){
+iSwap=document.getElementById(nameSwap);
+if (iSwap.value=="") {
+   if (idPos.value!="") {
+      iSwap.value=idPos.id;
+      idPos.className="select";
+      }
+   else 
+      {
+      alert("Вы не можете переставлять содержимое пустого эемента.");
+      }
+   }
+else
+   {
+   if (idPos.value=="") {
+       i=document.getElementById(iSwap.value);
+       idPos.value=i.value;
+       i.className="info";
+       i.value="";
+       iSwap.value="";
+       }
+   else
+       {
+       alert("Элемент занят.");
+       }
+   }
+}
+
+function outPosInfo(id,info){
+i=document.getElementById(id);
+if (i!=null){
+   if (i.tagName=="SPAN") {i.innerHTML=info} else {i.value=info};
+   } 
+}
+
+//
+// Преобразование строки в esc не unicode
+//
+function ansiescape(s){
+outStr="";
+for (i=0; i<s.length; i++){
+    switch (s.charAt(i)) {
+      case "А":outStr=outStr+"%C0";break
+      case "Б":outStr=outStr+"%C1";break  
+      case "В":outStr=outStr+"%C2";break  
+      case "Г":outStr=outStr+"%C3";break  
+      case "Д":outStr=outStr+"%C4";break  
+      case "Е":outStr=outStr+"%C5";break  
+      case "Ж":outStr=outStr+"%C6";break  
+      case "З":outStr=outStr+"%C7";break  
+      case "И":outStr=outStr+"%C8";break  
+      case "Й":outStr=outStr+"%C9";break  
+      case "К":outStr=outStr+"%CA";break 
+      case "Л":outStr=outStr+"%CB";break  
+      case "М":outStr=outStr+"%CC";break  
+      case "Н":outStr=outStr+"%CD";break  
+      case "О":outStr=outStr+"%CE";break  
+      case "П":outStr=outStr+"%CF";break  
+      case "Р":outStr=outStr+"%D0";break  
+      case "С":outStr=outStr+"%D1";break  
+      case "Т":outStr=outStr+"%D2";break  
+      case "У":outStr=outStr+"%D3";break  
+      case "Ф":outStr=outStr+"%D4";break  
+      case "Х":outStr=outStr+"%D5";break
+      case "Ц":outStr=outStr+"%D6";break  
+      case "Ч":outStr=outStr+"%D7";break  
+      case "Ш":outStr=outStr+"%D8";break  
+      case "Щ":outStr=outStr+"%D9";break
+      case "Ъ":outStr=outStr+"%DA";break 
+      case "Ы":outStr=outStr+"%DB";break
+      case "Ь":outStr=outStr+"%DC";break
+      case "Э":outStr=outStr+"%DD";break
+      case "Ю":outStr=outStr+"%DE";break
+      case "Я":outStr=outStr+"%DF";break
+      case "Ё":outStr=outStr+"%A8";break
+      case "а":outStr=outStr+"%E0";break
+      case "б":outStr=outStr+"%E1";break
+      case "в":outStr=outStr+"%E2";break
+      case "г":outStr=outStr+"%E3";break
+      case "д":outStr=outStr+"%E4";break
+      case "е":outStr=outStr+"%E5";break
+      case "ж":outStr=outStr+"%E6";break
+      case "з":outStr=outStr+"%E7";break
+      case "и":outStr=outStr+"%E8";break
+      case "й":outStr=outStr+"%E9";break
+      case "к":outStr=outStr+"%EA";break
+      case "л":outStr=outStr+"%EB";break
+      case "м":outStr=outStr+"%EC";break
+      case "н":outStr=outStr+"%ED";break
+      case "о":outStr=outStr+"%EE";break
+      case "п":outStr=outStr+"%EF";break
+      case "р":outStr=outStr+"%F0";break
+      case "с":outStr=outStr+"%F1";break
+      case "т":outStr=outStr+"%F2";break
+      case "у":outStr=outStr+"%F3";break
+      case "ф":outStr=outStr+"%F4";break
+      case "х":outStr=outStr+"%F5";break
+      case "ц":outStr=outStr+"%F6";break
+      case "ч":outStr=outStr+"%F7";break
+      case "ш":outStr=outStr+"%F8";break
+      case "щ":outStr=outStr+"%F9";break
+      case "ъ":outStr=outStr+"%FA";break
+      case "ы":outStr=outStr+"%FB";break
+      case "ь":outStr=outStr+"%FC";break
+      case "э":outStr=outStr+"%FD";break
+      case "ю":outStr=outStr+"%FE";break
+      case "я":outStr=outStr+"%FF";break
+      case "ё":outStr=outStr+"%B8";break
+      default: outStr=outStr+escape(s.charAt(i));
+      }
+    }
+return outStr
+}
+
+//
+// Преобразование строки в esc не unicode
+//
+function oemescape(s){
+outStr="";
+for (i=0; i<s.length; i++){
+    switch (s.charAt(i)) {
+      case "А":outStr=outStr+"%80";break
+      case "Б":outStr=outStr+"%81";break  
+      case "В":outStr=outStr+"%82";break  
+      case "Г":outStr=outStr+"%83";break  
+      case "Д":outStr=outStr+"%84";break  
+      case "Е":outStr=outStr+"%85";break  
+      case "Ж":outStr=outStr+"%66";break  
+      case "З":outStr=outStr+"%87";break  
+      case "И":outStr=outStr+"%88";break  
+      case "Й":outStr=outStr+"%89";break  
+      case "К":outStr=outStr+"%8A";break 
+      case "Л":outStr=outStr+"%8B";break  
+      case "М":outStr=outStr+"%8C";break  
+      case "Н":outStr=outStr+"%8D";break  
+      case "О":outStr=outStr+"%8E";break  
+      case "П":outStr=outStr+"%8F";break  
+      case "Р":outStr=outStr+"%90";break  
+      case "С":outStr=outStr+"%91";break  
+      case "Т":outStr=outStr+"%92";break  
+      case "У":outStr=outStr+"%93";break  
+      case "Ф":outStr=outStr+"%94";break  
+      case "Х":outStr=outStr+"%95";break
+      case "Ц":outStr=outStr+"%96";break  
+      case "Ч":outStr=outStr+"%97";break  
+      case "Ш":outStr=outStr+"%98";break  
+      case "Щ":outStr=outStr+"%99";break
+      case "Ъ":outStr=outStr+"%9A";break 
+      case "Ы":outStr=outStr+"%9B";break
+      case "Ь":outStr=outStr+"%9C";break
+      case "Э":outStr=outStr+"%9D";break
+      case "Ю":outStr=outStr+"%9E";break
+      case "Я":outStr=outStr+"%9F";break
+      case "а":outStr=outStr+"%A0";break
+      case "б":outStr=outStr+"%A1";break
+      case "в":outStr=outStr+"%A2";break
+      case "г":outStr=outStr+"%A3";break
+      case "д":outStr=outStr+"%A4";break
+      case "е":outStr=outStr+"%A5";break
+      case "ж":outStr=outStr+"%A6";break
+      case "з":outStr=outStr+"%A7";break
+      case "и":outStr=outStr+"%A8";break
+      case "й":outStr=outStr+"%A9";break
+      case "к":outStr=outStr+"%AA";break
+      case "л":outStr=outStr+"%AB";break
+      case "м":outStr=outStr+"%AC";break
+      case "н":outStr=outStr+"%AD";break
+      case "о":outStr=outStr+"%AE";break
+      case "п":outStr=outStr+"%AF";break
+      case "р":outStr=outStr+"%E0";break
+      case "с":outStr=outStr+"%E1";break
+      case "т":outStr=outStr+"%E2";break
+      case "у":outStr=outStr+"%E3";break
+      case "ф":outStr=outStr+"%E4";break
+      case "х":outStr=outStr+"%E5";break
+      case "ц":outStr=outStr+"%E6";break
+      case "ч":outStr=outStr+"%E7";break
+      case "ш":outStr=outStr+"%E8";break
+      case "щ":outStr=outStr+"%E9";break
+      case "ъ":outStr=outStr+"%EA";break
+      case "ы":outStr=outStr+"%EB";break
+      case "ь":outStr=outStr+"%EC";break
+      case "э":outStr=outStr+"%ED";break
+      case "ю":outStr=outStr+"%EE";break
+      case "я":outStr=outStr+"%EF";break
+      case " ":outStr=outStr+"%20";break
+      default: outStr=outStr+escape(s.charAt(i));
+      }
+    }
+return outStr
+}
+
+
+//
+//
+//
+function onClickFindClient() {
+
+if (window.parent!=window)
+   {
+    window.parent.surname=document.getElementById("surname");
+    window.parent.pin=document.getElementById("pin").value;
+   }
+else
+   {
+    saveLS("PINFINDCLIENT",document.getElementById("pin").value);
+    saveLS("SURNAMEFINDCLIENT",document.getElementById("surname").value);
+   }
+user=document.getElementsByName("USER")[0].value;
+password=document.getElementsByName("PASSWORD")[0].value;
+openNewDialogWindow("nascgi.exe?command=findclient&USER="+ansiescape(user)+
+                    "&PASSWORD="+ansiescape(password));
+} 
+
+function onClickFindClientFamily() {
+window.parent.dogstr=document.getElementById("dogstr").value;
+window.parent.viewdogstr=document.getElementById("viewdogstr").value;
+user=document.getElementsByName("USER")[0].value;
+password=document.getElementsByName("PASSWORD")[0].value;
+openNewDialogWindow("nascgi.exe?command=findclientfamily&USER="+ansiescape(user)+
+                    "&PASSWORD="+ansiescape(password));
+} 
+
+
+//
+// При редактировании талона в случае заполненности поля ПИН и пустой 
+// фамилии обеспечивает имитацию нажатия кнопки поиска пациента
+// Эта функция может быть включена в обработчик события onChange ПИН
+//
+function fastGoFindClient(){
+iPin=document.getElementById("pin");
+if (iPin==null){
+   alert("Неопределен объект pin");
+   return;
+   }
+iSurName=document.getElementById("surname");
+if (iSurName==null){
+   alert("Неопределен объект surname");
+   return;
+   }
+iFindClient=document.getElementById("findclient");
+if (iFindClient==null){
+   alert("Неопределен объект findclient");
+   return;
+   }
+iForm=document.getElementById("form1");
+if (iForm==null) {iForm=document.getElementById("f1")};
+if (iForm==null) {
+   alert("Неопределен объект form1 (f1)");
+   return;
+   }
+if ((iPin.value!="") && (iSurName.value=="")) {
+   iFindClient.focus();
+   iFindClient.onclick();
+   } 
+}
+//
+// Функция подготовки данных на основном экране поиска пацинта в населении
+// при запуске из статистики
+//
+function prepareFind() {
+var _pin;
+if (window.parent==window) {_pin=loadLS("PINFINDCLIENT")} else {_pin=window.parent.pin}
+if (_pin=="") { 
+   return 
+   }
+var p=document.getElementById("pin");                       
+p.value=_pin;
+i=document.getElementById("buttonfindfirst")
+if (i==null) {
+   alert("Неопределен объект buttonfindfirst");
+   return
+   }
+iForm=document.getElementById("mainform");
+if (iForm==null) {iForm=document.getElementById("f1")};
+if (iForm==null){
+   alert("Неопределен объект mainform (f1)");
+   return;
+   }
+i.focus();
+d=document.getElementById("dopelement");
+if (d==null) {
+   var e1=document.createElement('INPUT');
+   e1.type='hidden';
+   e1.id='dopelement';
+   iForm.appendChild(e1);
+   var e2=document.createElement('INPUT');
+   e2.type='hidden';
+   e2.id='makescript';
+   iForm.appendChild(e2);
+   }
+d=document.getElementById("dopelement");
+if (d==null) {
+   alert("Неопределен объект dopelement");
+   return
+   }
+d.name="COMMAND";
+d.value="НАЙТИ";
+s=document.getElementById("makescript");
+if (s==null) {
+   alert("Неопределен объект makescipt");
+   return
+   }
+s.name="MAKESCRIPT";
+s.value="pressButtonLoadData()";
+iForm.submit();   
+}
+
+
+function prepareFindFamily()
+{
+if (window.parent.dogstr=="") { 
+   return 
+   }
+p=document.getElementById("dogstr");                       
+p.value=window.parent.dogstr;
+try
+{
+p=document.getElementById("viewdogstr");
+p.value=window.parent.viewdogstr;
+}
+catch (e) {};
+i=document.getElementById("buttonfindfirst")
+if (i==null) {
+   alert("Неопределен объект buttonfindfirst");
+   return
+   }
+i.click();
+}
+
+
+function pressButtonLoadData(){
+p=document.getElementById("pinclient");
+if (p==null) {
+   alert("Неопределен объект pinclient");
+   return;
+   }
+if (p.value!="") {
+   var ld=document.getElementById("loaddata");
+   if (ld==null) {
+       alert("Неопределен объект loaddata.\nВзятие данных невозможно.");
+       return;
+       }
+//   i.onclick();
+   try {
+   ld.click();
+   }catch(e) {alert(e)};
+   }
+}
+
+function openNewDialogWindow(P1){
+if (window.parent!=window) 
+   {
+    window.parent.oldBodyHtml=window.document.body.innerHTML;
+    window.parent.afterPerenos=afterPerenos;
+    if (document.body.onbeforeunload==null){
+       window.parent.restoreQuitOff=false;
+       }
+    else
+       {
+       document.body.onbeforeunload=null;
+       window.parent.restoreQuitOff=true;
+       };
+    if (newModeWait=='Y') {
+       try {  
+//     window.parent.document.getElementById('frame1').style.display='none';
+//     window.parent.document.getElementById('frame2').style.display='';
+       window.parent.document.getElementById('fset').cols='0%,100%';
+       } catch(e) {alert(e)};
+      }
+   }
+else
+   {
+    saveLS("OLDBODYHTML",window.document.body.innerHTML);
+    saveLS("AFTERPERENOS",afterPerenos);
+    if (document.body.onbeforeunload==null){
+       saveLS("RESTOREQUITOFF",false);
+       }
+    else
+       {
+       document.body.onbeforeunload=null;
+       saveLS("RESTOREQUITOFF",true);
+       };
+   }
+window.location.replace(P1);
+}
+
+function outNextWindow(P1,idParam1,idParam2){
+i1=document.getElementById(idParam1);
+if (i1==null){
+   alert('Неизвестная пернменная '+idParam1);
+   return
+   }
+i2=document.getElementById(idParam2);
+if (i2==null){
+   alert('Неизвестная пернменная '+idParam2);
+   return
+   }
+s=P1+'&'+i1.name+'='+i1.value+'&'+i2.name+'='+i2.value;
+s1=myshowModalDialog(s,'','dialogWidth:850px')
+window.returnValue=s1;
+window.close();
+}
+
+function openNewWindow(idBegin,P1){
+findBegin="";
+id=document.getElementById(idBegin);
+if (id!=null){
+   findBegin=id.value;
+   }
+window.parent.oldBodyHtml=window.document.body.innerHTML;
+window.parent.afterPereons=afterPerenos;
+if (document.body.onbeforeunload==null){
+   window.parent.restoreQuitOff=false;
+   }
+else
+   {
+   document.body.onbeforeunload=null;
+   window.parent.restoreQuitOff=true;
+   }
+window.location.replace(P1+"&findselect1="+findBegin);
+}
+
+function closeNewWindow(){
+if (window.parent!=window) 
+   {
+    window.document.body.innerHTML=window.parent.oldBodyHtml;
+    afterPerenos=window.parent.afterPerenos;
+    if (window.parent.restoreQuitOff) {
+       document.body.onbeforeunload=quitOff;
+    }
+    window.parent.restoreQuitOff=false;
+    if (newModeWait=='Y') {
+       try{
+//     window.parent.document.getElementById('frame1').style.display='';
+//     window.parent.document.getElementById('frame2').style.display='none';
+       window.parent.document.getElementById('fset').cols='100%,0%';
+       } catch(e) {alert(e)};
+   }
+  }
+else
+  {
+   window.document.body.innerHTML=loadLS("OLDBODYHTML");
+   afterPerenos=loadLS("AFTERPERENOS");
+   if (loadLS("RESTOREQUITOFF")) {document.body.onbeforeunload=quitOff};
+   saveLS("RESTOREQUITOFF",false);
+  }
+}
+
+function restoreScreen(s){
+window.document.body.innerHTML=s;
+}
+
+function saveScreen(s){
+s=window.document.body.innerHTML;
+}
+
+function setOpacityDocument(o)
+{
+try
+{
+document.body.style.opacity=o;
+}
+catch(e) {}
+}
+
+function setOpacityAllPage(o)
+{
+i=document.getElementById('allpage');
+
+if (i==null) {
+   var htmlBody=document.body.innerHTML;
+   document.body.innerHTML='<div id="allpage">'+htmlBody+'</div>';
+   };
+
+i=document.getElementById('allpage');
+if (i!=null) {try {i.style.opacity=o} catch(e) {}};
+}
+
+
+function dialogInputDate(id){
+if ((!('showModalDialog' in window))||(newModeModalDialog=='Y'))
+   {
+    dialogInputDate2(id);
+    return
+   }
+i=document.getElementById(id);
+if (i==null) {
+   alert('Неопределенная пременная '+id);
+   return
+}
+if ('value' in i) 
+   {s=i.value}
+else
+   {s=i.innerHTML};
+setOpacityDocument(0.1);
+s=myshowModalDialog(nameCalendar,s,'dialogWidth:auto');
+setOpacityDocument(1.0);
+if (s!="") {
+   if ('value' in i)
+      {i.value=s}
+   else 
+      {i.innerHTML=s};
+   i=document.getElementById(id);
+   if (i.onchange!=null) {i.onchange()};
+}
+i=document.getElementById(id);
+i.focus();
+}
+
+function extclose()
+{
+if ('myclose' in window) {myclose()} else {window.close()};
+}
+
+function removeModalWin()
+{
+var f=document.getElementById(iframeModalWin);
+if (f!=null) {document.body.removeChild(f)};
+var b=document.getElementById('idclosemodalwin');
+if (b!=null) {document.body.removeChild(b)};
+}
+
+function dialogInputDate2(id){
+i=document.getElementById(id);
+if (i==null) {
+   alert('Неопределенная пременная '+id);
+   return
+}
+if ('value' in i) 
+   {s=i.value}
+else
+   {s=i.innerHTML};
+idEditModalWin=id;
+
+removeModalWin();
+
+setOpacityAllPage(0.1);
+
+f=document.createElement('iframe');
+f.style.position='fixed';
+f.style.top='10%';
+f.style.left='25%';
+f.style.borderRadius='10px';
+f.style.border='5px outset blue';
+f.style.display='none';
+f.id=iframeModalWin;
+f.style.width='50%';
+f.style.height='80%';
+f.src=nameCalendarNew;
+
+document.body.appendChild(f);
+f.contentWindow.dialogArguments=s;
+f.style.display=''
+f.contentWindow.myclose=function () {dialogInputDate2Close()}; 
+f.scrollIntoView();
+f.focus();
+
+var b=document.createElement('button');
+b.id='idclosemodalwin';
+b.style.position='fixed';
+b.style.top='10%';
+b.style.left='76%';
+b.style.width='auto';
+b.style.height='auto';
+b.style.backgroundColor='red';
+b.style.textAlign='center';
+b.style.borderRadius='50%';
+b.style.fontWeight='900';
+b.innerHTML='X';
+b.title='Закрыть календарь';
+b.onclick=function () {dialogInputDate2Close()};
+document.body.appendChild(b);
+
+}
+
+function dialogInputDate2Close()
+{
+var f=document.getElementById(iframeModalWin);
+var i=document.getElementById(idEditModalWin);
+var s='';
+if ('returnValue' in f.contentWindow) {s=f.contentWindow.returnValue};
+removeModalWin();
+if (s!="") {
+   if ('value' in i)
+      {i.value=s}
+   else 
+      {i.innerHTML=s};
+   i=document.getElementById(idEditModalWin);
+   if (i.onchange!=null) {i.onchange()};
+}
+setOpacityAllPage(1.0);
+
+i=document.getElementById(idEditModalWin);
+try{
+i.select();
+i.focus();
+} catch(e) {};
+}
+
+
+
+function dialogInputListDate(id,dprev){
+
+i=document.getElementById(id);
+if (i==null) {
+   alert('Неопределенная пременная '+id);
+   return
+}
+setOpacityDocument(0.1);
+s=myshowModalDialog(nameCalendar,dprev,'');
+if (s!="") {
+   if (i.value!='') {i.value+=';'};
+   i.value+=s;
+   dialogInputListDate(id,s);
+}
+setOpacityDocument(1.0);
+i=document.getElementById(id);
+i.focus();
+}
+
+
+function dialogInputSpr(id,commandLine,idview,iddop){
+if ((!('showModalDialog' in window))||(newModeModalDialog=='Y'))
+   {
+    dialogInputSpr2(id,commandLine,idview,iddop);
+    return
+   }
+i=document.getElementById(id);
+if (i==null) {
+   alert('Неопределенная пременная '+id);
+   return
+}
+if (i.value=="") {
+   commandLineFirst=commandLine} 
+else 
+   { 
+   commandLineFirst=commandLine+"&findselect1="+ansiescape(i.value)
+   }
+
+setOpacityDocument(0.1);
+s=myshowModalDialog(commandLineFirst,'','dialogWidth:900px');
+while (s.indexOf("&")>=0) {
+   s01=s.split("&");
+   if ((s01.length==3)&&((s01[2]=="MAKECLEARFILTER=Y")||(s01[2].substr(0,11)=="MAKEFILTER="))) 
+      {
+      //  Удаляем фильтр
+      cl=commandLine.split("&");
+      commandLine="";
+      for (n=1;n<=cl.length;n++)
+          {
+          if (cl[n-1].substr(0,7)!="filter=")
+             {
+             if (commandLine!="") {commandLine=commandLine+"&"}
+             commandLine=commandLine+cl[n-1];
+             }
+          }
+      if (s01[2].substr(0,11)=="MAKEFILTER=") 
+         {
+         if (commandLine!="") {commandLine=commandLine+"&"}
+         commandLine=commandLine+"filter="+ansiescape(s01[2].substr(11));
+         }
+      }
+   commandLine=commandLine+'&findselect1='+ansiescape(s01[0])+'&findselect2='+ansiescape(s01[1])
+   s=myshowModalDialog(commandLine,'','dialogWidth:900px')
+   }
+setOpacityDocument(1.0);
+i=document.getElementById(id);
+if (s!="") {
+   if (s.indexOf("?")<0) {
+      if (s!="---") {
+          i.value=s;
+          } else {
+          i.value="";
+          if (idview!="") {
+             i1=document.getElementById(idview);
+             if (i1!=null) {i1.value=""}
+             }
+          }
+      }
+   else
+      {
+      s01=s.split("?");
+      i.value=s01[0];
+      if (idview!="") {
+          i1=document.getElementById(idview);
+          if (i1!=null) {i1.value=s01[1] }
+          }
+      if (iddop!="") {
+          i1=document.getElementById(iddop);
+          if (i1!=null) {i1.value=s01[2] }
+          }
+      }
+}
+i=document.getElementById(id);
+if (("focus" in i)&&(i.type!="hidden")) {i.focus()};
+if (afterDialogInputSpr!=null) {afterDialogInputSpr();afterDialogInputSpr=null};
+}              	
+
+
+function dialogInputSpr2(id,commandLine,idview,iddop){
+i=document.getElementById(id);
+if (i==null) {
+   alert('Неопределенная пременная '+id);
+   return
+}
+
+if ((i.value!="")&&(modeFirstModalWin=='Y')) 
+   {
+   commandLineFirst=commandLine+"&findselect1="+ansiescape(i.value)
+   }
+else 
+   { 
+   commandLineFirst=commandLine
+   }
+
+removeModalWin();
+setOpacityAllPage(0.1);
+
+modeFirstModalWin='Y';
+idEditModalWin=id;
+idViewModalWin=idview;
+idDopModalWin=iddop;
+commandLineModalWin=commandLine;
+var f=document.getElementById(iframeModalWin);
+if (f!=null) {document.body.removeChild(f)};
+f=document.createElement('iframe');
+f.style.position='fixed';
+f.style.top='10%';
+f.style.left='10%';
+f.style.borderRadius='10px';
+f.style.border='5px outset blue';
+f.style.display='none';
+f.id=iframeModalWin;
+f.style.width='80%';
+f.style.height='80%';
+f.src=commandLineFirst;
+document.body.appendChild(f);
+f.contentWindow.dialogArguments=i.value;
+f.style.display=''
+f.contentWindow.myclose=function () {dialogInputSpr2Close()}; 
+f.focus();
+
+
+var b=document.createElement('button');
+b.id='idclosemodalwin';
+b.style.position='fixed';
+b.style.top='10%';
+b.style.left='91%';
+b.style.width='auto';
+b.style.height='auto';
+b.style.backgroundColor='red';
+b.style.textAlign='center';
+b.style.borderRadius='50%';
+b.style.fontWeight='900';
+b.innerHTML='X';
+b.title='Закрыть справочник';
+b.onclick=function () {dialogInputSpr2Close()};
+document.body.appendChild(b);
+
+}
+
+function dialogInputSpr2Close(){
+var f=document.getElementById(iframeModalWin);
+var i=document.getElementById(idEditModalWin);
+var s='';
+if ('returnValue' in f.contentWindow) {s=f.contentWindow.returnValue};
+
+removeModalWin();
+
+while (s.indexOf("&")>=0) {
+   s01=s.split("&");
+   var commandLine=commandLineModalWin;
+   if ((s01.length==3)&&((s01[2]=="MAKECLEARFILTER=Y")||(s01[2].substr(0,11)=="MAKEFILTER="))) 
+      {
+      //  Удаляем фильтр
+      cl=commandLine.split("&");
+      commandLine="";
+      for (n=1;n<=cl.length;n++)
+          {
+          if (cl[n-1].substr(0,7)!="filter=")
+             {
+             if (commandLine!="") {commandLine=commandLine+"&"}
+             commandLine=commandLine+cl[n-1];
+             }
+          }
+      if (s01[2].substr(0,11)=="MAKEFILTER=") 
+         {
+         if (commandLine!="") {commandLine=commandLine+"&"}
+         commandLine=commandLine+"filter="+ansiescape(s01[2].substr(11));
+         }
+      }
+   modeFirstModalWin='N';
+   s=dialogInputSpr2(idEditModalWin,commandLine+'&findselect1='+ansiescape(s01[0])+'&findselect2='+ansiescape(s01[1]),
+                     idViewModalWin,idDopModalWin);
+   return ;
+   }
+i=document.getElementById(idEditModalWin);
+if (s!="") {
+   if (s.indexOf("?")<0) {
+      if (s!="---") {
+          i.value=s;
+          } else {
+          i.value="";
+          if (idViewModalWin!="") {
+             i1=document.getElementById(idViewModalWin);
+             if (i1!=null) {i1.value=""}
+             }
+          }
+      }
+   else
+      {
+      s01=s.split("?");
+      i.value=s01[0];
+      if (idViewModalWin!="") {
+          i1=document.getElementById(idViewModalWin);
+          if (i1!=null) {i1.value=s01[1] }
+          }
+      if (idDopModalWin!="") {
+          i1=document.getElementById(idDopModalWin);
+          if (i1!=null) {i1.value=s01[2] }
+          }
+      }
+}
+
+setOpacityAllPage(1.0);
+
+i=document.getElementById(idEditModalWin);
+if (("focus" in i)&&(i.type!="hidden")) {i.select();i.focus()};
+if (afterDialogInputSpr!=null) {afterDialogInputSpr();afterDialogInputSpr=null};
+}              	
+
+
+
+function dialogSpanSpr(id,commandLine,idview,iddop){
+i=document.getElementById(id);
+if (i==null) {
+   alert('Неопределенная пременная '+id);
+   return
+}
+alert('dialogSpanSpr');
+if (i.innerHTML=="") {
+   commandLineFirst=commandLine} 
+else 
+   { 
+   commandLineFirst=commandLine+"&findselect1="+ansiescape(i.innerHTML)
+   }
+setOpacityDocument(0.1);
+s=myshowModalDialog(commandLineFirst,'','dialogWidth:850px');
+while (s.indexOf("&")>=0) {
+   s01=s.split("&");
+   if ((s01.length==3)&&((s01[2]=="MAKECLEARFILTER=Y")||(s01[2].substr(0,11)=="MAKEFILTER="))) 
+      {
+      //  Удаляем фильтр
+      cl=commandLine.split("&");
+      commandLine="";
+      for (n=1;n<=cl.length;n++)
+          {
+          if (cl[n-1].substr(0,7)!="filter=")
+             {
+             if (commandLine!="") {commandLine=commandLine+"&"}
+             commandLine=commandLine+cl[n-1];
+             }
+          }
+      if (s01[2].substr(0,11)=="MAKEFILTER=") 
+         {
+         if (commandLine!="") {commandLine=commandLine+"&"}
+         commandLine=commandLine+"filter="+ansiescape(s01[2].substr(11));
+         }
+      }
+   s=myshowModalDialog(commandLine+'&findselect1='+ansiescape(s01[0])+'&findselect2='+ansiescape(s01[1]),
+                     '','dialogWidth:850px')
+   }
+setOpacityDocument(1.0);
+i=document.getElementById(id);
+if (s!="") {
+   if (s.indexOf("?")<0) {
+      if (s!="---") {
+          i.innerHTML=s;
+          } else {
+          i.innerHTML="";
+          if (idview!="") {
+             i1=document.getElementById(idview);
+             if (i1!=null) {i1.innerHTML=""}
+             }
+          }
+      }
+   else
+      {
+      s01=s.split("?");
+      i.innerHTML=s01[0];
+      if (idview!="") {
+          i1=document.getElementById(idview);
+          if (i1!=null) {i1.innerHTML=s01[1] }
+          }
+      if (iddop!="") {
+          i1=document.getElementById(iddop);
+          if (i1!=null) {i1.innerHTML=s01[2] }
+          }
+      }
+}
+i=document.getElementById(id);
+if (("focus" in i)&&(i.type!="hidden")) {i.focus()};
+}              	
+
+
+
+function dialogInputSprList(id,commandLine,idview,iddop){
+i=document.getElementById(id);
+if (i==null) {
+   alert('Неопределенная пременная '+id);
+   return
+}
+if (i.value=="") {
+   commandLineFirst=commandLine} 
+else 
+   { 
+   commandLineFirst=commandLine+"&findselect1="+i.value
+   }
+setOpacityDocument(0.1);
+s=myshowModalDialog(commandLineFirst,'','dialogWidth:850px');
+while (s.indexOf("&")>=0) {
+   s01=s.split("&");
+   if ((s01.length==3)&&((s01[2]=="MAKECLEARFILTER=Y")||(s01[2].substr(0,11)=="MAKEFILTER="))) 
+      {
+      //  Удаляем фильтр
+      cl=commandLine.split("&");
+      commandLine="";
+      for (n=1;n<=cl.length;n++)
+          {
+          if (cl[n-1].substr(0,7)!="filter=")
+             {
+             if (commandLine!="") {commandLine=commandLine+"&"}
+             commandLine=commandLine+cl[n-1];
+             }
+          }
+      if (s01[2].substr(0,11)=="MAKEFILTER=") 
+         {
+         if (commandLine!="") {commandLine=commandLine+"&"}
+         commandLine=commandLine+"filter="+s01[2].substr(11);
+         }
+      }
+   s=myshowModalDialog(commandLine+'&findselect1='+s01[0]+'&findselect2='+s01[1],
+                     '','dialogWidth:850px')
+   }
+setOpacityDocument(1.0);
+i=document.getElementById(id);
+if (s!="") {
+   if (s.indexOf("?")<0) {
+      if (s!="---") {
+          if (i.value!='') {i.value+=';'};
+          i.value+=s;
+          } else {
+          i.value="";
+          if (idview!="") {
+             i1=document.getElementById(idview);
+             if (i1!=null) {i1.value=""}
+             }
+          }
+      }
+   else
+      {
+      s01=s.split("?");
+      i.value=s01[0];
+      if (idview!="") {
+          i1=document.getElementById(idview);
+          if (i1!=null) {i1.value=s01[1] }
+          }
+      if (iddop!="") {
+          i1=document.getElementById(iddop);
+          if (i1!=null) {i1.value=s01[2] }
+          }
+      }
+}
+i=document.getElementById(id);
+if (("focus" in i)&&(i.type!="hidden")) {i.focus()};
+}              	
+
+
+//
+//Функция копирует из текущего окна в окно, открывшие текущее, содержимое
+//всех элементов INPUT,TEXTAREA и SELECT, имеющих одинаковые непустые имена 
+//
+
+
+function copyToParentWindow(){
+a=document.getElementsByTagName("INPUT");
+listNameInput  = new Array();
+listValueInput = new Array();
+n=0;
+if (a.length>0) {
+    for (i=0 ;i<a.length ; i++){
+         if ((a[i].name!="") && ((a[i].type.toUpperCase()=="TEXT") || (a[i].type.toUpperCase()=="HIDDEN"))) {
+            if (a[i].name!="NRSTRINFO") {
+               listNameInput[n]=a[i].name;
+               listValueInput[n]=a[i].value;
+               }
+            n++;
+	    }
+         }
+   }
+b=document.getElementsByTagName("SELECT");
+listNameSelect = new Array();
+listTextSelect = new Array();
+listValueSelect = new Array();
+n=0;
+if (b.length>0) {
+    for (i=0 ;i<b.length ; i++){
+        si=b[i].selectedIndex;
+        listNameSelect[n]=b[i].name;
+        listTextSelect[n]=b[i].options[si].text;
+        listValueSelect[n]=b[i].options[si].value;
+        n++;
+        }
+   }
+c=document.getElementsByTagName("TEXTAREA");
+listNameTextArea  = new Array();
+listValueTextArea = new Array();
+n=0;
+if (c.length>0) {
+    for (i=0 ;i<c.length ; i++){
+         if (c[i].name!="") {
+            listNameTextArea[n]=c[i].name;
+            listValueTextArea[n]=c[i].value;
+            n++;
+	    }
+         }
+   }
+
+closeNewWindow();
+if (listNameInput.length>0) {
+    for (i=0 ;i<listNameInput.length ; i++){
+        a1=document.getElementsByName(listNameInput[i]);
+        for (i1=0 ;i1<a1.length ; i1++) {
+            a1[i1].value=listValueInput[i];
+            }
+       }
+   }
+if (listNameSelect.length>0) {
+    for (i=0 ;i<listNameSelect.length ; i++){
+        b1=document.getElementsByName(listNameSelect[i]);
+
+        for (i1=0 ;i1<b1.length ; i1++) {
+            b1[i1].selectedIndex=0;
+            flagFind=false;
+            if (b1[i1].tagName=='SELECT'){
+                  for (i2=0 ;i2<b1[i1].options.length; i2++) {
+                      t=b1[i1].options[i2].text;
+                      v=b1[i1].options[i2].value;
+                      if ((t.toUpperCase()==listTextSelect[i].toUpperCase()) ||
+                           (v.toUpperCase()==listValueSelect[i].toUpperCase())) {
+                            b1[i1].selectedIndex=i2;
+                            flagFind=true;
+                            break;
+                            }
+                      }
+                  if (!flagFind) 
+                     {
+                     var oldLen=b1[i1].options.length;
+                     b1[i1].options[oldLen]=new Option (listValueSelect[i],listValueSelect[i]);
+                     b1[i1].selectedIndex=oldLen;
+                     flagFind=true;
+                     break;
+                     }
+            }else {
+                  flagFind=true;
+                  b1[i1].value=listValueSelect[i];
+            }
+            if (!flagFind) { alert(listNameSelect[i]+" неопределено")}
+            }
+        }
+    }
+if (listNameTextArea.length>0) {
+    for (i=0 ;i<listNameTextArea.length ; i++){
+        c1=document.getElementsByName(listNameTextArea[i]);
+        for (i1=0 ;i1<c1.length ; i1++) {
+            c1[i1].value=listValueTextArea[i];
+            }
+       }
+   }
+if (noshowclninfo)
+   {
+    var infoCln=getEl('talonclninfo');
+    if (infoCln!=null) {infoCln.style.display='none'}
+   }
+if (afterPerenos!="") {eval(afterPerenos)};
+}
+
+
+function copyOneDopParamToParentWindow(name1,name2)
+{
+if (listNameInput.length>0) {
+    for (i=0 ;i<listNameInput.length ; i++){
+        if (listNameInput[i]!=name1)  { continue }
+        a1=document.getElementsByName(name2);
+        for (i1=0 ;i1<a1.length ; i1++) {
+            a1[i1].value=listValueInput[i];
+            }
+        }
+   }
+if (listNameSelect.length>0) {
+    for (i=0 ;i<listNameSelect.length ; i++){
+        if (listNameSelect[i]!=name1) { continue }
+        b1=document.getElementsByName(name2);
+        for (i1=0 ;i1<b1.length ; i1++) {
+            b1[i1].selectedIndex=0;
+            flagFind=false;
+            if (b1[i1].tagName=='SELECT'){
+                  for (i2=0 ;i2<b1[i1].options.length; i2++) {
+                      t=b1[i1].options[i2].text;
+                      v=b1[i1].options[i2].value;
+                      if ((t.toUpperCase()==listTextSelect[i].toUpperCase()) ||
+                           (v.toUpperCase()==listValueSelect[i].toUpperCase())) {
+                            b1[i1].selectedIndex=i2;
+                            flagFind=true;
+                            break;
+                            }
+                      }
+                  if (!flagFind) 
+                     {
+                     var oldLen=b1[i1].options.length;
+                     b1[i1].options[oldLen]=new Option (listValueSelect[i],listValueSelect[i]);
+                     b1[i1].selectedIndex=oldLen;
+                     flagFind=true;
+                     break;
+                     }
+            }else {
+                  flagFind=true;
+                  b1[i1].value=listValueSelect[i];
+            }
+            if (!flagFind) { alert(listNameSelect[i]+" неопределено")}
+            }
+        }
+    }
+if (listNameTextArea.length>0) {
+    for (i=0 ;i<listNameTextArea.length ; i++){
+        if (listNameTextArea[i]!=name1)  { continue }
+        c1=document.getElementsByName(name2);
+        for (i1=0 ;i1<c1.length ; i1++) {
+            c1[i1].value=listValueTextArea[i];
+            }
+        }
+   }
+}
+
+
+
+
+function copyToOpenerWindow(){
+a=document.getElementsByTagName("INPUT");
+if (a.length>0) {
+    for (i=0 ;i<a.length ; i++){
+         if ((a[i].name!="") && ((a[i].type.toUpperCase()=="TEXT") || (a[i].type.toUpperCase()=="HIDDEN"))) {
+             a1=window.opener.document.getElementsByName(a[i].name);
+             for (i1=0 ;i1<a1.length ; i1++) {
+                  a1[i1].value=a[i].value;
+                  }
+             }
+         }
+    }
+a=document.getElementsByTagName("SELECT");
+if (a.length>0) {
+    for (i=0 ;i<a.length ; i++){
+        if (a[i].name!="") {
+            a1=window.opener.document.getElementsByName(a[i].name);
+            n=a[i].selectedIndex;
+            textSelect=a[i].options[n].text;
+            valueSelect=a[i].options[n].value;
+            for (i1=0 ;i1<a1.length ; i1++) {
+                 a1[i1].selectedIndex=0;
+                 for (i2=0 ;i2<a1[i1].options.length; i2++) {
+                      if ((a1[i1].options[i2].text==textSelect) ||
+                           (a1[i1].options[i2].value==valueSelect)) {
+                            a1[i1].selectedIndex=i2;
+                            break;
+                            }
+                      }
+                 }
+            }
+        }
+    }
+window.close();
+}
+
+function verifyNewWin(nameAction,nameButton) {
+i=document.getElementById("NEWWIN");
+if (i!=null) {
+   if (i.value!="Y") {
+      document.getElementById("mainform").action=nameAction;
+      return true ;
+      } 
+   else 
+      {
+      w=window.open("viewrep.htm");
+      w.document.body.innerHTML=document.body.innerHTML;
+      w.focus();
+      w.document.getElementById("NEWWIN").value="N";
+      w.document.getElementById(nameButton).click();
+      return false ;
+      }
+   }
+else
+   {
+   alert("Не определен NEWWIN");
+   return false;
+   }
+}
+
+function getAutoHeight(size) {
+return ((screen.height*size)/100)
+}
+
+
+// Функция исп.в статистике для подтверждения удаления в соп. таблицах
+function dialogDeleteSopStat(Title,NameId,Command,NR,NameForm){
+r=confirm(Title);
+if (r) {
+   setQuitOn();
+   document.getElementById("rull").value=Command;
+   document.getElementById("param").value=NR;
+   if (NameId!=""){
+       i=document.getElementById(NameId);
+       if (i!=null) {
+          i.value="";
+          }
+       }
+   }
+return r;
+}
+
+
+function setAnalizNoUse(namecheck,nameinput){
+c=document.getElementById(namecheck);
+i=document.getElementById(nameinput);
+if (c.checked) 
+   {
+   i.value="";
+   i.readOnly=false
+   }
+else
+   {
+   i.value="NO USE";
+   i.readOnly=true;
+   } 
+}
+
+
+function invertUseParamAnaliz(NS,CountParam){
+for (n=1;n<=CountParam;n++)
+    {
+    i=document.getElementById('c'+NS+'.'+n);
+    if (i!=null) {i.click()}
+    }
+}
+
+
+function invertPost(CountParam){
+for (n=1;n<=CountParam;n++)
+    {
+    i=document.getElementById('p'+n);
+    if (i!=null) {i.click()}
+    }
+}
+
+function connectCheckBox(){
+c=document.getElementsByTagName("INPUT");
+sResult="";
+for (n=0;n<=(c.length-1);n++)
+    {
+    if (c[n].type.toUpperCase()=="CHECKBOX")
+       {
+       if (c[n].checked)
+          {
+          if (sResult!="") {sResult=sResult+";"}
+          sResult=sResult+c[n].name;
+          };
+       }
+    }
+return sResult;
+}
+
+
+
+function setCheckOne(nameCountParam,v){
+i=document.getElementById(nameCountParam);
+if (i==null) return; 
+CountParam=i.value;
+for (n=1;n<=CountParam;n++)
+    {
+    i=document.getElementById('p'+n);
+    if (i!=null) {if (i.value==v) {i.click()}}
+    }
+}
+
+function convertCharFromCode39(s){
+r="";
+if (s=='01') {r="А"};
+if (s=='02') {r="Б"};
+if (s=='03') {r="В"};
+if (s=='04') {r="Г"};
+if (s=='05') {r="Д"};
+if (s=='06') {r="Е"};
+if (s=='07') {r="Ж"};
+if (s=='08') {r="З"};
+if (s=='09') {r="И"};
+if (s=='10') {r="К"};
+if (s=='11') {r="Л"};
+if (s=='12') {r="М"};
+if (s=='13') {r="Н"};
+if (s=='14') {r="О"};
+if (s=='15') {r="П"};
+if (s=='16') {r="Р"};
+if (s=='17') {r="С"};
+if (s=='18') {r="Т"};
+if (s=='19') {r="У"};
+if (s=='20') {r="Ф"};
+if (s=='21') {r="Х"};
+if (s=='22') {r="Ц"};
+if (s=='23') {r="Ч"};
+if (s=='24') {r="Ш"};
+if (s=='25') {r="Щ"};
+if (s=='26') {r="Ы"};
+if (s=='27') {r="Э"};
+if (s=='28') {r="Ю"};
+if (s=='29') {r="Я"};
+return r;
+}
+
+function loadCode39(c39){
+s="";
+s=s+convertCharFromCode39(c39.slice(0,2));
+s=s+convertCharFromCode39(c39.slice(2,4));
+s=s+convertCharFromCode39(c39.slice(4,6));
+s=s+convertCharFromCode39(c39.slice(6,8));
+s=s+c39.slice(8);
+return s;
+}
+
+
+// Устанавливает у формы nameIdForm target и action
+function setParamForm(nameIdForm,t,a){
+i=document.getElementById(nameIdForm);
+if (i==null) {
+   alert("Не определен "+nameIdForm);
+   return false;
+   }
+i.target=t;
+i.action=a;
+}
+
+
+//Вызов submit, формы очистка target и очистка rull 
+function submitFormClear(nameIdForm,nameIdRull)
+{
+var i=document.getElementById(nameIdForm);
+if (i==null) 
+   {
+   alert("Не определен "+nameIdForm);
+   return false;
+   }
+i.submit();
+i.target="";
+if (nameIdRull!="")
+   {
+   var r=document.getElementById(nameIdRull);
+   if (r==null) 
+      {
+      alert("Не определен "+nameIdRull);
+      return false;
+      }
+   r.value="";
+   }
+return false;
+}
+
+// Вычислить возраст 
+function getVozr(nameDR,nameVozr) {
+var idDR=document.getElementById(nameDR);
+if (idDR==null){
+   alert('Неопределен объект '+nameDR);
+   return;
+   }
+if (idDR.value=="") {return }
+var idVozr=document.getElementById(nameVozr);
+if (idVozr==null){
+   alert('Неопределен объект '+nameVozr);
+   return;
+   }
+var inputStr=idDR.value;
+var delim1 = inputStr.indexOf("/");
+var delim2 = inputStr.lastIndexOf("/");
+var dd = parseInt(inputStr.substring(0,delim1),10);
+var mm = parseInt(inputStr.substring(delim1 + 1,delim2),10);
+var yyyy = parseInt(inputStr.substring(delim2 + 1, inputStr.length),10);
+var dateR=new Date(yyyy,mm-1,dd);
+var currentD=new Date();
+v=currentD.getFullYear()-dateR.getFullYear()-1;
+if (dateR.getMonth()<currentD.getMonth()) {v++};
+if ((dateR.getMonth()==currentD.getMonth())&&(dateR.getDate()<=currentD.getDate())) {v++};
+idVozr.value=v;
+}
+
+
+function dialogVerifyExistBl(i,commandstr)
+{
+if ((!('showModalDialog' in window))||(newModeModalDialog=='Y'))
+   {
+    dialogVerifyExistBl2(i,commandstr);
+    return
+   }
+
+var serBl='';
+var sbl=document.getElementById('serbl');
+if (sbl!=null) {var serBl=sbl.value};
+var nomerBl=document.getElementById('nomerbl').value;
+var codeMed=document.getElementById('codemedend').value;
+//
+// ModeVerifyBl должна быть определена на основной странице
+//
+if (ModeVerifyBl=='3') 
+   {
+   if (nomerBl=="") {alert("Не указан номер БЛ"); return false};
+   }
+if ((ModeVerifyBl!=2)&&(ModeVerifyBl!=3))
+   {
+   if (serBl=="") {alert("Не указана серия БЛ"); return false};
+   if (nomerBl=="") {alert("Не указан номер БЛ"); return false};
+   }
+if (codeMed=="") {alert("Не указан врач, закрывший БЛ"); return false};
+serBl=ansiescape(serBl);
+nomerBl=ansiescape(nomerBl);
+codeMed=ansiescape(codeMed);
+// rnd добавлено для того, чтобы каждый раз выполнялась операция,
+// а не бралась сохраненная копия страницы
+setOpacityDocument(0.1);
+var s='';
+s=myshowModalDialog("statcgi.exe?command=verifyExistBl&SERBL="+serBl+
+  "&NOMERBL="+nomerBl+"&CODEMED="+codeMed+"&rnd="+10000*Math.random(),"",
+  "dialogWidth:600px;dialogHeight:300px");
+setOpacityDocument(1.0);
+if (s=="Y") {i.form.rull.value=commandstr;setQuitOn();i.form.submit()} else {i.form.runscript.value=''};
+}
+
+
+function dialogVerifyExistBl2(i,commandstr)
+{
+
+// Не стандартое использование переменных
+// idEditModalWin - id кнопки 
+// idDopModalWin  - СТРОКА!!! cgi команды
+idEditModalWin=i;
+idDopModalWin=commandstr;
+var serBl='';
+var sbl=document.getElementById('serbl');
+if (sbl!=null) {var serBl=sbl.value};
+var nomerBl=document.getElementById('nomerbl').value;
+var codeMed=document.getElementById('codemedend').value;
+//
+// ModeVerifyBl должна быть определена на основной странице
+//
+if (ModeVerifyBl=='3') 
+   {
+   if (nomerBl=="") {alert("Не указан номер БЛ"); return false};
+   }
+if ((ModeVerifyBl!=2)&&(ModeVerifyBl!=3))
+   {
+   if (serBl=="") {alert("Не указана серия БЛ"); return false};
+   if (nomerBl=="") {alert("Не указан номер БЛ"); return false};
+   }
+if (codeMed=="") {alert("Не указан врач, закрывший БЛ"); return false};
+serBl=ansiescape(serBl);
+nomerBl=ansiescape(nomerBl);
+codeMed=ansiescape(codeMed);
+// rnd добавлено для того, чтобы каждый раз выполнялась операция,
+// а не бралась сохраненная копия страницы
+
+removeModalWin();
+setOpacityAllPage(0.1);
+
+f=document.createElement('iframe');
+f.style.position='fixed';
+f.style.top='10%';
+f.style.left='10%';
+f.style.borderRadius='10px';
+f.style.border='5px outset blue';
+f.style.display='none';
+f.id=iframeModalWin;
+f.style.width='80%';
+f.style.height='80%';
+f.src='statcgi.exe?command=verifyExistBl&SERBL='+serBl+'&NOMERBL='+nomerBl+'&CODEMED='+codeMed+'&rnd="+10000*Math.random()';
+document.body.appendChild(f);
+f.contentWindow.dialogArguments='';
+f.style.display=''
+f.contentWindow.myclose=function () {dialogVerifyExistBl2Close()}; 
+f.scrollIntoView();
+f.focus();
+
+var b=document.createElement('button');
+b.id='idclosemodalwin';
+b.style.position='fixed';
+b.style.top='10%';
+b.style.left='91%';
+b.style.width='auto';
+b.style.height='auto';
+b.style.backgroundColor='red';
+b.style.textAlign='center';
+b.style.borderRadius='50%';
+b.style.fontWeight='900';
+b.innerHTML='X';
+b.title='Закрыть календарь';
+b.onclick=function () {dialogVerifyExistBl2Close()};
+document.body.appendChild(b);
+}
+
+function dialogVerifyExistBl2Close()
+{
+setOpacityDocument(1.0);
+var s='';
+if ('returnValue' in f.contentWindow) {s=f.contentWindow.returnValue};
+removeModalWin();
+
+setOpacityAllPage(1.0);
+
+
+var i=idEditModalWin;
+var commandstr=idDopModalWin;
+if (s=="Y") {i.form.rull.value=commandstr;setQuitOn();i.form.submit()} else {i.form.runscript.value=''};
+
+}
+
+
+function getFreeBl(idSer,idNomer,codeMed){
+if ((!('showModalDialog' in window))||(newModeModalDialog=='Y'))
+   {
+    getFreeBl2(idSer,idNomer,codeMed);
+    return
+   }
+
+
+i1=document.getElementById(idSer);
+if (i1==null) {
+   alert("Неопределен элемент "+idSer);
+   return
+   } 
+i2=document.getElementById(idNomer);
+if (i2==null) {
+   alert("Неопределен элемент "+idNomer);
+   return
+   } 
+if (i2.value!="") {
+   alert("Больничный лист уже выбран");
+   return;
+   }
+
+// rnd добавлено для того, чтобы каждый раз выполнялась операция,
+// а не бралась сохраненная копия страницы
+setOpacityDocument(0.1);
+s=myshowModalDialog("statcgi.exe?command=freebl&codemed="+codeMed+
+   "&rnd="+10000*Math.random(),"","dialogWidthDialog:auto");
+setOpacityDocument(1.0);
+if (s!="") {
+   s12=s.split('&');
+   if ((i1.value=="")&&(i2.value=="")){
+      i1.value=s12[0];
+      i2.value=s12[1];
+      }
+   else
+      {
+      alert("Серия и номер больничного листа уже выбраны");
+      }
+   }
+}
+
+
+function getFreeBl2(idSer,idNomer,codeMed){
+idEditModalWin=idSer;
+idDopModalWin=idNomer;
+var i1=document.getElementById(idSer);
+if (i1==null) {
+   alert("Неопределен элемент "+idSer);
+   return
+   } 
+var i2=document.getElementById(idNomer);
+if (i2==null) {
+   alert("Неопределен элемент "+idNomer);
+   return
+   } 
+if (i2.value!="") {
+   alert("Больничный лист уже выбран");
+   return;
+   }
+removeModalWin();
+setOpacityAllPage(0.1);
+
+f=document.createElement('iframe');
+f.style.position='fixed';
+f.style.top='10%';
+f.style.left='10%';
+f.style.borderRadius='10px';
+f.style.border='5px outset blue';
+f.style.display='none';
+f.id=iframeModalWin;
+f.style.width='80%';
+f.style.height='80%';
+f.src='statcgi.exe?command=freebl&codeMed='+codeMed+'&rnd='+10000*Math.random();
+document.body.appendChild(f);
+f.contentWindow.dialogArguments='';
+f.style.display=''
+f.contentWindow.myclose=function () {getClientBl2Close()}; 
+f.scrollIntoView();
+f.focus();
+
+var b=document.createElement('button');
+b.id='idclosemodalwin';
+b.style.position='fixed';
+b.style.top='10%';
+b.style.left='91%';
+b.style.width='auto';
+b.style.height='auto';
+b.style.backgroundColor='red';
+b.style.textAlign='center';
+b.style.borderRadius='50%';
+b.style.fontWeight='900';
+b.innerHTML='X';
+b.title='Закрыть календарь';
+b.onclick=function () {getFreeBl2Close()};
+document.body.appendChild(b);
+
+}
+
+function getFreeBl2Close()
+{
+var f=document.getElementById(iframeModalWin);
+var i1=document.getElementById(idEditModalWin);
+var i2=document.getElementById(idDopModalWin);
+var s='';
+if ('returnValue' in f.contentWindow) {s=f.contentWindow.returnValue};
+removeModalWin();
+setOpacityAllPage(1.0);
+
+if (s!="") {
+   var s12=s.split('&');
+   if ((i1.value=="")&&(i2.value=="")){
+      i1.value=s12[0];
+      i2.value=s12[1];
+      }
+   else
+      {
+      alert("Серия и номер больничного листа уже выбраны");
+      }
+}
+setOpacityAllPage(1.0);
+
+}
+
+
+
+
+function getClientBl(idSer,idNomer,fio){
+if ((!('showModalDialog' in window))||(newModeModalDialog=='Y'))
+   {
+    getClientBl2(idSer,idNomer,fio);
+    return
+   }
+
+i1=document.getElementById(idSer);
+if (i1==null) {
+   alert("Неопределен элемент "+idSer);
+   return
+   } 
+i2=document.getElementById(idNomer);
+if (i2==null) {
+   alert("Неопределен элемент "+idNomer);
+   return
+   } 
+// rnd добавлено для того, чтобы каждый раз выполнялась операция,
+// а не бралась сохраненная копия страницы
+setOpacityDocument(0.1);
+s=myshowModalDialog("statcgi.exe?command=clientbl&"+fio+
+   "&rnd="+10000*Math.random(),"","dialogWidth:auto");
+setOpacityDocument(1.0);
+if (s!="") {
+   s12=s.split('&');
+   if ((i1.value=="")&&(i2.value=="")){
+      i1.value=s12[0];
+      i2.value=s12[1];
+      }
+   else
+      {
+      alert("Серия и номер больничного листа уже выбраны");
+      }
+   }
+}
+
+
+function getClientBl2(idSer,idNomer,fio){
+idEditModalWin=idSer;
+idDopModalWin=idNomer;
+var i1=document.getElementById(idSer);
+if (i1==null) {
+   alert("Неопределен элемент "+idSer);
+   return
+   } 
+var i2=document.getElementById(idNomer);
+if (i2==null) {
+   alert("Неопределен элемент "+idNomer);
+   return
+   } 
+
+removeModalWin();
+setOpacityAllPage(0.1);
+
+f=document.createElement('iframe');
+f.style.position='fixed';
+f.style.top='10%';
+f.style.left='10%';
+f.style.borderRadius='10px';
+f.style.border='5px outset blue';
+f.style.display='none';
+f.id=iframeModalWin;
+f.style.width='80%';
+f.style.height='80%';
+f.src='statcgi.exe?command=clientbl&'+fio+'&rnd='+10000*Math.random();
+document.body.appendChild(f);
+f.contentWindow.dialogArguments='';
+f.style.display=''
+f.contentWindow.myclose=function () {getClientBl2Close()}; 
+f.scrollIntoView();
+f.focus();
+
+var b=document.createElement('button');
+b.id='idclosemodalwin';
+b.style.position='fixed';
+b.style.top='10%';
+b.style.left='91%';
+b.style.width='auto';
+b.style.height='auto';
+b.style.backgroundColor='red';
+b.style.textAlign='center';
+b.style.borderRadius='50%';
+b.style.fontWeight='900';
+b.innerHTML='X';
+b.title='Закрыть календарь';
+b.onclick=function () {getClientBl2Close()};
+document.body.appendChild(b);
+
+}
+
+function getClientBl2Close()
+{
+var f=document.getElementById(iframeModalWin);
+var i1=document.getElementById(idEditModalWin);
+var i2=document.getElementById(idDopModalWin);
+var s='';
+if ('returnValue' in f.contentWindow) {s=f.contentWindow.returnValue};
+removeModalWin();
+setOpacityAllPage(1.0);
+
+if (s!="") {
+   var s12=s.split('&');
+   if ((i1.value=="")&&(i2.value=="")){
+      i1.value=s12[0];
+      i2.value=s12[1];
+      }
+   else
+      {
+      alert("Серия и номер больничного листа уже выбраны");
+      }
+}
+setOpacityAllPage(1.0);
+
+}
+
+
+
+
+
+function dialogDiagDisp(idDiag){
+if ((!('showModalDialog' in window))||(newModeModalDialog=='Y'))
+   {
+    dialogDiagDisp2(idDiag);
+    return
+   }
+
+i=document.getElementById(idDiag);
+if (i==null) {
+   alert("Не определен элемент "+idDiag);
+   return
+   }
+s=ansiescape(i.value);
+setOpacityDocument(0.1);
+s=myshowModalDialog("dispcgi.exe?command=dialogdiag&diag="+s,"","dialogWidth:950px");
+setOpacityDocument(1.0);
+i=document.getElementById(idDiag);
+if (s!="---") {i.value=s};
+}
+
+function dialogDiagDisp2(idDiag)
+{
+i=document.getElementById(idDiag);
+if (i==null) {
+   alert("Не определен элемент "+idDiag);
+   return
+   }
+
+idEditModalWin=idDiag;
+var s=ansiescape(i.value);
+removeModalWin();
+
+setOpacityAllPage(0.1);
+
+f=document.createElement('iframe');
+f.style.position='fixed';
+f.style.top='10%';
+f.style.left='10%';
+f.style.borderRadius='10px';
+f.style.border='5px outset blue';
+f.style.display='none';
+f.id=iframeModalWin;
+f.style.width='80%';
+f.style.height='80%';
+f.src='dispcgi.exe?command=dialogdiag&diag='+s;
+document.body.appendChild(f);
+f.contentWindow.dialogArguments='';
+f.style.display=''
+f.contentWindow.myclose=function () {dialogDiagDisp2Close()}; 
+f.scrollIntoView();
+f.focus();
+
+var b=document.createElement('button');
+b.id='idclosemodalwin';
+b.style.position='fixed';
+b.style.top='10%';
+b.style.left='91%';
+b.style.width='auto';
+b.style.height='auto';
+b.style.backgroundColor='red';
+b.style.textAlign='center';
+b.style.borderRadius='50%';
+b.style.fontWeight='900';
+b.innerHTML='X';
+b.title='Закрыть календарь';
+b.onclick=function () {dialogDiagDisp2Close()};
+document.body.appendChild(b);
+
+
+}
+
+function dialogDiagDisp2Close()
+{
+var f=document.getElementById(iframeModalWin);
+var i=document.getElementById(idEditModalWin);
+var s='';
+if ('returnValue' in f.contentWindow) {s=f.contentWindow.returnValue};
+removeModalWin();
+if (s!="---") {i.value=s};
+
+setOpacityAllPage(1.0);
+
+}
+
+function focusElementByName(name){
+try
+{
+i=document.getElementsByName(name);
+if (i.length>0){
+   if ("focus" in i[0]) {i[0].focus()}
+   }
+}
+catch(e) {};
+}
+
+function focusElementFirstEdit()
+{
+var nameTag;
+var typeTag;
+var i=document.getElementsByTagName("*");
+for (n=0;n<i.length;n++)
+    {
+    nameTag=i[n].tagName.toLocaleUpperCase();
+    if (nameTag=='INPUT') {typeTag=i[n].type.toLocaleUpperCase()} else {typeTag=""};
+    if (((nameTag=="INPUT")&&(typeTag=="TEXT"))||
+       (nameTag=="SELECT")) {i[n].focus();return }
+    }
+}
+
+function showInfoDiag(sDiag,nameExe){
+if ((!('showModalDialog' in window))||(newModeModalDialog=='Y'))
+   {
+    showInfoDiag2(sDiag,nameExe);
+    return
+   }
+setOpacityDocument(0.1);
+myshowModalDialog(nameExe+"?command=showinfodiag&codediag="+sDiag,"",
+   "dialogWidth=500px;dialogHeight=320px;border=thin;help=no");
+setOpacityDocument(1.0);
+}
+
+
+function showInfoDiag2(sDiag,nameExe)
+{
+removeModalWin();
+
+setOpacityAllPage(0.1);
+
+f=document.createElement('iframe');
+f.style.position='fixed';
+f.style.top='10%';
+f.style.left='10%';
+f.style.borderRadius='10px';
+f.style.border='5px outset blue';
+f.style.display='none';
+f.id=iframeModalWin;
+f.style.width='80%';
+f.style.height='80%';
+f.src=nameExe+"?command=showinfodiag&codediag="+sDiag;
+document.body.appendChild(f);
+f.contentWindow.dialogArguments='';
+f.style.display=''
+f.contentWindow.myclose=function () {showInfoDiag2Close()}; 
+f.scrollIntoView();
+f.focus();
+
+var b=document.createElement('button');
+b.id='idclosemodalwin';
+b.style.position='fixed';
+b.style.top='10%';
+b.style.left='91%';
+b.style.width='auto';
+b.style.height='auto';
+b.style.backgroundColor='red';
+b.style.textAlign='center';
+b.style.borderRadius='50%';
+b.style.fontWeight='900';
+b.innerHTML='X';
+b.title='Закрыть окно';
+b.onclick=function () {showInfoDiag2Close()};
+document.body.appendChild(b);
+
+
+}
+
+function showInfoDiag2Close()
+{
+var f=document.getElementById(iframeModalWin);
+var i=document.getElementById(idEditModalWin);
+var s='';
+if ('returnValue' in f.contentWindow) {s=f.contentWindow.returnValue};
+removeModalWin();
+
+setOpacityAllPage(1.0);
+try{
+//document.getElementById("diagmain").focus()
+if (idElementFocus!='') {setTimeout("document.getElementById(idElementFocus).focus();idElementFocus=''",100)};
+
+} catch (e) {alert(e)};
+
+}
+
+
+
+function openVarWin(W,P1,P2,P3){
+if (!W || W.closed) {
+    W=window.open(P1,P2,P3);
+}
+W.focus();
+return W
+}
+
+function closeVarWin(W){
+if (W && (!W.closed)) {W.close()}
+}
+
+
+function setSex(i,nameidsex){
+isex=document.getElementById(nameidsex);
+if (isex==null) {
+    alert("Не определен элемент "+nameidsex);
+    return
+    }
+if (i.value!="") {
+    if (i.value.toLocaleUpperCase()=="ММ") 
+       {
+       isex.value="М";
+       return
+       }
+    if (i.value.toLocaleUpperCase()=="МММ") 
+       {
+       isex.value="М";
+       return
+       }
+    if (i.value.toLocaleUpperCase()=="ДД") 
+       {
+       isex.value="Ж";
+       return
+       }
+    if (i.value.toLocaleUpperCase()=="ДДД") 
+       {
+       isex.value="Ж";
+       return
+       }
+    endChar=i.value.charAt(i.value.length-1);
+    if ((endChar=="Ч")||(endChar=="ч")){
+        isex.value="М"
+        }
+    else
+        {isex.value="Ж"};
+    }
+}
+
+var winBrigad=null;
+
+function dialogBrigad(){
+winBrigad=openVarWin(winBrigad,'statcgi.exe?command=dialogBrigad','','');
+}
+
+function outFileInIFrame(namefile){
+s="<iframe width='100%' height='100%' src='"+namefile+"'></iframe>";
+alert(s);
+document.body.innerHTML=s;
+}
+
+/* Используется в статистике для простановки отметки о выдаче результата */
+function selectSendAnaliz(iName,nTalon){
+i=document.getElementById(iName);
+s=i.innerHTML;
+if (s.indexOf("&nbsp;")>-1) {s=""};
+sResult="";
+if (s=="") {sResult="+"} else {sResult=""};
+if (sResult=="") {sResult="&nbsp;"};
+if (document.all) 
+   xmlHttp=new ActiveXObject("Msxml2.XMLHTTP")
+else
+   xmlHttp=new XMLHttpRequest();
+xmlHttp.open("GET","statcgi.exe?command=setsendanaliz&infosend="+sResult+"&idTalon="+nTalon,false);
+xmlHttp.send("");
+if (xmlHttp.responseText.indexOf("OK")<0) 
+   {alert("Ошибка при установке отметки о выдачи результата:"+xmlHttp.responseText) }
+else
+   {i.innerHTML=sResult} 
+}
+
+
+/* обеспечивает перерисовку экрана талона при изменении врача (нужно пр работе
+  со стандартами) */
+var nameRullContinue="";
+function setChangeMedEnd(nameRull)
+{
+nameRullContinue=nameRull;
+var i1=document.getElementById('medend');
+if (i1!=null) 
+   {
+   i1.onchange=new Function("document.getElementById('rull').value=nameRullContinue;document.body.onbeforeunload=quitOn;f1.submit()")
+   }  
+}
+
+/*
+обработка клавиатурных событий при выборе из диалогового окна
+*/
+function moveCursorSelect(evt,iactiv,Color2)
+{
+evt = (evt) ? evt : window.event;
+var keyCode=evt.keyCode;
+if (keyCode==13) {iactiv.click();return false };
+if (keyCode==45) {var i1=document.getElementById('pf2');if (i1!=null) {i1.focus()} }
+if (keyCode==46) {var iclear=document.getElementById('clear');if (iclear!=null) {iclear.click();return false} };
+
+if (keyCode==27) {returnValue='';window.close();return false}
+if (keyCode==9) {return true}
+
+if ((keyCode==37)||(keyCode==38)||(keyCode==39)||(keyCode==40))
+   {
+   var newNomer=0;
+   if (keyCode==39) {newNomer=parseInt(iactiv.id.substr(1))+7};
+   if (keyCode==37) {newNomer=parseInt(iactiv.id.substr(1))-7};
+   if (keyCode==38) {newNomer=parseInt(iactiv.id.substr(1))-1};
+   if (keyCode==40) {newNomer=parseInt(iactiv.id.substr(1))+1};
+   var newName='b'+newNomer;
+   newElement=document.getElementById(newName);
+   if (newElement!=null) 
+      {
+      iactiv.style.backgroundColor=Color2;
+      iactiv.blur();
+      newElement.focus();
+      }
+   }
+return false;
+}
+
+var listCopyOpener=""
+
+function copyToOpenerOne(nameOne)
+{
+var iTo=opener.document.getElementsByName(nameOne)[0];
+var iFrom=document.getElementsByName(nameOne)[0];
+if (iTo!=null)
+   {
+   if (iFrom!=null) 
+      {
+      iTo.value=iFrom.value;
+      } 
+   else 
+      {iTo.value=''};
+   }
+}
+
+function copyToOpener()
+{
+var listName=listCopyOpener.split(",");
+if (listName.length>0)
+   {
+   var n=0;
+   for (n=0;n<listName.length;n++)
+       {
+       copyToOpenerOne(listName[n]);
+       }  
+   }
+}
+
+function disableSelect(nameitem)
+{
+return true;
+i1=document.getElementById(nameitem);
+if (i1==null)
+   {
+   alert("Неизвестный элемент "+nameitem);
+   return
+   }
+if (i1.onselectstart!="undefined")
+   {
+   i1.onselectstart=new Function("return false");
+   }
+else
+   {
+   if (i1.style.MozUserSelect!="undefined") {i1.style.MozUserSelect="none"};
+   }
+}
+
+
+function showInfoImage()
+{
+var l=document.body.getElementsByTagName('INPUT');
+var nl=0;
+var w=open('');
+w.document.writeln('<body bgColor="Silver">');
+w.document.writeln('<table width="100%"><tr><td style="text-align:center">');
+w.document.writeln('Вам доступны следующие основыные команды:');
+w.document.writeln('</td></tr></table>');
+w.document.writeln('<table width="100%" border="1" cellspacing="0">');
+w.document.writeln('<tr><th>Пиктограмма</th><th>Описание</th><th>Быстрый вызов</th></tr>');
+for (nl=0;nl<l.length;nl++)
+    {
+    if ((l[nl].type=='image')&&(l[nl].accessKey!='')) 
+       {
+        w.document.writeln('<tr>');
+        w.document.writeln('<td style="text-align:center"><image src="'+l[nl].src+'"></td>');
+        w.document.writeln('<td>'+l[nl].title+'</td>');
+        w.document.writeln('<td>Alt-'+l[nl].accessKey+'</td>');
+        w.document.writeln('</tr>');
+       }
+    }
+w.document.writeln('</table>');
+w.document.writeln('</body>');
+}
+
+
+
+function copyParamToOpener(nameParamFrom,nameParamTo,flagShowError)
+{
+if ((!opener)||(opener.closed))
+   {
+   alert("Открывающее окно закрыто");
+   return false;
+   }
+var ito=opener.document.getElementsByName(nameParamTo);
+var ifrom=document.getElementsByName(nameParamFrom);
+if ((ito.length<1 ))
+   {
+   if (flagShowError) {alert("В opener нет элемента "+nameParamTo)};
+   return false;
+   }
+if ((ifrom.length<1 ))
+   {
+   if (flagShowError) {alert("В текущем окне нет элемента "+nameParamFrom)};
+   return false;
+   }
+ito[0].value=ifrom[0].value;
+}
+
+function copyParamFromOpener(nameParamFrom,nameParamTo,flagShowError)
+{
+if ((!opener)||(opener.closed))
+   {
+   alert("Открывающее окно закрыто");
+   return false;
+   }
+var ifrom=opener.document.getElementsByName(nameParamFrom);
+var ito=document.getElementsByName(nameParamTo);
+if ((ifrom.length<1))
+   {
+   if (flagShowError) {alert("В opener нет элемента "+nameParamFrom)};
+   return false;
+   }
+if ((ito.length<1))
+   {
+   if (flagShowError) {alert("В текущем окне нет элемента "+nameParamTo)};
+   return false;
+   }
+ito[0].value=ifrom[0].value.toLocaleUpperCase();
+}
+
+
+function copyFIOToOpener()
+{
+copyParamToOpener("SURNAME","SURNAME",true);
+copyParamToOpener("NAME1","NAME1",true);
+copyParamToOpener("NAME2","NAME2",true);
+copyParamToOpener("DR","DR",true);
+copyParamToOpener("TEL","TEL",true);
+}
+
+function copyFIOFromOpener()
+{
+copyParamFromOpener("SURNAMEINFO","SURNAME",false);
+copyParamFromOpener("NAME1INFO","NAME1",false);
+copyParamFromOpener("NAME2INFO","NAME2",false);
+copyParamFromOpener("DRINFO","DR",false);
+copyParamFromOpener("TELINFO","TEL",false);
+var iwork=document.getElementsByName("SURNAME");
+if (iwork.length>0) 
+   {
+    if (iwork[0].value=="") 
+       {
+        copyParamFromOpener("SURNAME","SURNAME",true);
+        copyParamFromOpener("NAME1","NAME1",true);
+        copyParamFromOpener("NAME2","NAME2",true);
+        copyParamFromOpener("DR","DR",true);
+        copyParamFromOpener("TEL","TEL",false);
+       }
+   }
+}
+
+function focusOpener()
+{
+if ((!opener)||(opener.closed))
+   {
+   alert("Открывающее окно закрыто");
+   return false;
+   }
+opener.focus();
+}
+
+function copyToIdOpener(nameId,value)
+{
+if ((!opener)||(opener.closed))
+   {
+   alert("Открывающее окно закрыто");
+   return false;
+   }
+var i=opener.document.getElementById(nameId);
+if (i!=null) 
+   {i.value=value}
+else
+   {alert("В открывающем окне неопределен параметр "+nameId)};
+}
+
+function ItemDisplayOn(nameDisplay,iView)
+{
+var i=document.getElementById(nameDisplay);
+if (i!=null) 
+   { 
+   i.style.display='';
+   }
+iView.scrollIntoView();
+iView.focus();
+}
+
+function ItemDisplayOff(nameDisplay,iView)
+{
+var i=document.getElementById(nameDisplay);
+if (i!=null) 
+   {
+   i.style.display='none';
+   }
+iView.scrollIntoView();
+iView.focus();
+}
+
+function ItemDisplayOnOff(nameItem)
+{
+var i=document.getElementById(nameItem);
+if (i!=null) 
+   {
+   if (i.style.display=='') {i.style.display='none'} else {i.style.display=''};
+   }
+
+}
+
+function PreparePrint(i)
+{
+var listItem=i.getElementsByTagName("*");
+var i1=null;
+if (listItem.lenght==0) {return}
+for (n=0;n<listItem.length;n++)
+    {
+    i1=listItem[n];
+    i1.style.color="black";
+    i1.style.backgroundColor="white";
+    if (i1.tagName=="TR") {i1.style.pageBreakInside="avoid"};
+    }
+}
+
+/* Функция меняет местами select.options и newoptions */
+
+function swapOptions(idSelect,newoptions)
+{
+var ids=document.getElementById(idSelect);
+if (ids==null) {return};
+var countSwap=ids.options.length;
+if (newoptions.length<countSwap) {countSwap=newoptions.length};
+var swapTmp='';
+for (n=0;n<countSwap;n++)
+    {
+    swapTmp=ids.options[n].text;
+    ids.options[n].text=newoptions[n];
+    newoptions[n]=swapTmp;
+    }
+}
+
+function addHiddenInForm(f,nameHidden,valueHidden)
+{
+f.innerHTML='<INPUT TYPE="HIDDEN" NAME="'+nameHidden+'" VALUE="'+valueHidden+'">'+
+            f.innerHTML;
+}
+
+function makeKeyCodeTab(t,nameButton)
+{
+var b=document.getElementById(nameButton);
+if (b==null) 
+   {
+    alert('Неопределен элемент '+nameButton);
+    return;
+   }
+if (t.value=='') {b.tabIndex=0} else {b.tabIndex=-1};
+setTimeout('document.getElementById("'+nameButton+'").tabIndex=0',500);
+}
+
+function exitNoSave()
+{
+return confirm('Выйти без сохранения?');
+}
+
+function makeZoom(newZoom)
+{
+if ("zoom" in document.body.style)
+   {
+   document.body.style.zoom=newZoom;
+   return true;
+   }
+if ("transform" in document.body.style)
+   {
+   document.body.style.transform='scale('+newZoom+')'
+   return true;
+   }
+alert('Извините, но Ваш браузер не моддерживает маштабирование.\nИспользйте браузеры Chrome или Internet Explorer 10.');  
+return false;
+}
+
+function setColorTag(c1,c2,nameTag)
+{
+document.body.style.backgroundColor=c1;
+document.body.style.color=c2;
+var l=document.body.getElementsByTagName(nameTag);
+for (i=0;i<l.length;i++)
+  {
+   l[i].style.backgroundColor=c1;
+   l[i].style.Color=c2;
+  }
+}
+
+function setColor(c1,c2)
+{
+document.body.style.backgroundColor=c1;
+document.body.style.color=c2;
+document.body.alinkColor=c2;
+document.body.linkColor=c2;
+document.body.vlinkColor=c2;
+setColorTag(c1,c2,'*');
+removeCookie('selectcolor1');
+addCookie('selectcolor1',c1,30);
+removeCookie('selectcolor2');
+addCookie('selectcolor2',c2,30);
+setColorPointer();
+}
+
+function setColorPointer()
+{
+var i;
+i=document.getElementById('c1');
+if (i!=null) {i.style.color='black';i.style.backgroundColor='silver'};
+i=document.getElementById('c2');
+if (i!=null) {i.style.color='white';i.style.backgroundColor='black'};
+i=document.getElementById('c3');
+if (i!=null) {i.style.color='#2F4F4F';i.style.backgroundColor='#B0E0E6'};
+}
+
+function loadColor()
+{
+var c1=findCookie('selectcolor1');
+var c2=findCookie('selectcolor2');
+if ((c1!='')&&(c2!='')) {setColor(c1,c2)} else {setColorPointer()}
+}
+
+function setFontSizeTag(fs,nameTag)
+{
+var l=document.body.getElementsByTagName(nameTag);
+for (i=0;i<l.length;i++)
+  {
+   l[i].style.fontSize=fs;
+  }
+}
+
+function setFontSizeNoChange()
+{
+var l=document.body.getElementsByTagName('*');
+var s;
+for (i=0;i<l.length;i++)
+  {
+   s=l[i].className;
+   if (s=='NOCHANGESIZE')    {l[i].style.fontSize='32px'};
+   if (s=='NOCHANGESIZE_15') {l[i].style.fontSize='32px'};
+   if (s=='NOCHANGESIZE_18') {l[i].style.fontSize='40px'};
+   if (s=='NOCHANGESIZE_25') {l[i].style.fontSize='48px'};
+  }
+}
+
+function setFontSize(fs)
+{
+document.body.style.fontSize=fs;
+setFontSizeTag(fs,'*');
+setFontSizeNoChange();
+removeCookie('fontsize');
+addCookie('fontsize',fs,15);
+}
+
+function loadFontSize()
+{
+var fs=findCookie('fontsize');
+if (fs!='') {setFontSize(fs)} else {setFontSizeNoChange()}
+}
+
+
+function findArray(a,f)
+{
+for (i=0;i<a.length;i++)
+    {
+     if (a[i]==f) {return i}
+    }
+return -1;
+}
+
+function supportStorage()
+{
+try 
+  {
+   var flagSupport=(('localStorage' in window)&&(window['localStorage']!=null));
+   return flagSupport;
+  }
+catch(e) {return false}
+}
+
+function saveLS (name,value)
+{
+if (!supportStorage())
+   {
+    alert('Нет поддержки localStorage');
+    return false;
+   }
+localStorage.setItem(name,value);
+return true;
+}
+
+function loadLS(name)
+{
+if (!supportStorage())
+   {
+    alert('Нет поддержки localStorage');
+    return null;
+   }
+return localStorage.getItem(name);
+}
+
+function loadLSHeightOverflow(nameLSHeight,nameLSOwerflow,nameId)
+{
+var o=loadLS(nameLSOwerflow);
+if (o==null) {return false};
+var h=loadLS(nameLSHeight);
+if (h==null) {return false};
+var i=getEl(nameId);
+if (i==null) {return false};
+if (o!="") 
+   { 
+    if (h=='0') {h=''};
+    i.style.height=h;
+    i.style.overflow=o;
+    return true;
+   }
+else
+   {
+    return false;
+   }
+}
+
+function saveLSHeightOverflow(nameLSHeight,nameLSOwerflow,nameId)
+{
+var i=getEl(nameId);
+if (i==null) {return false};
+var h=i.style.height;
+if (h=='') {h='0'}
+var o=i.style.overflow;
+saveLS(nameLSOwerflow,o);
+saveLS(nameLSHeight,h);
+return true;
+}
+
+function setParamSerNomerPolis(t)
+{
+var typePolis=t.value;
+oldSer=getEl('sp').value;
+if (typePolis=='2') {getEl('sp').value='ВС';getEl('np').maxLength=9};
+if (typePolis=='3') {getEl('sp').value='ЕП';getEl('np').maxLength=16};
+if ((typePolis!='2')&&(typePolis!='3')) {getEl('np').maxLength=2000}
+}
+
+
+function filter_input(e,regexp)
+{
+  e=e || window.event;
+  var target=e.target || e.srcElement;
+  var isIE=document.all;
+
+  if (target.tagName.toUpperCase()=='INPUT')
+  {
+    var code=isIE ? e.keyCode : e.which;
+    if (code<32 || e.ctrlKey || e.altKey) return true;
+
+    var char=String.fromCharCode(code);
+    if (!regexp.test(char)) return false;
+  }
+  return true;
+}
+
+function verify_reg_input(f,regexp,msg)
+{
+if (f.value=='') {return true};
+var r=regexp.test(f.value);
+if (!r) {f.focus();f.select();alert('Вы ввели неправльное значение.\n'+msg)};
+return r;
+}
+
+function clickCell(idTable,lineBegin,nCell,minDay)
+{
+var t=getEl(idTable);
+if (t==null) 
+   {
+    alert('Не обнаружена таблица '+idTable+'.');
+    return
+   }
+for (i=lineBegin;i<t.rows.length;i++) 
+    {
+    var c=t.rows[i].cells[nCell];
+    if ((c!=null)&&(parseInt(c.innerHTML)>parseInt(minDay))) {c.click()};
+    };
+}
+
+function clickCellOdd(idTable,lineBegin,minDay,flagOdd)
+{
+var t=getEl(idTable);
+if (t==null) 
+   {
+    alert('Не обнаружена таблица '+idTable+'.');
+    return
+   }
+for (i=lineBegin;i<t.rows.length;i++) 
+    {
+    for (j=0;j<5;j++)
+        {
+         var c=t.rows[i].cells[j];
+         if ((c!=null)&&(parseInt(c.innerHTML)>parseInt(minDay))) 
+            {
+             if (flagOdd)
+                {
+                 if ((parseInt(c.innerHTML) % 2)==0) {c.click()};
+                }
+             else
+                {
+                 if ((parseInt(c.innerHTML) % 2)!=0) {c.click()};
+                }
+            };
+        }
+    };
+}
+
+function cmpDateStr(d1,d2)
+{
+if ((d1=='')&&(d2=='')) {return '='};
+if (d1=='') {return '<'};
+if (d2=='') {return '>'};
+
+var delim11 = d1.indexOf("/");
+var delim12 = d1.lastIndexOf("/");
+var dd1 = parseInt(d1.substring(0,delim11),10);
+var mm1 = parseInt(d1.substring(delim11 + 1,delim12),10);
+var yyyy1 = parseInt(d1.substring(delim12 + 1, d1.length),10);
+
+var delim21 = d2.indexOf("/");
+var delim22 = d2.lastIndexOf("/");
+var dd2 = parseInt(d2.substring(0,delim21),10);
+var mm2 = parseInt(d2.substring(delim21 + 1,delim22),10);
+var yyyy2 = parseInt(d2.substring(delim22 + 1, d2.length),10);
+if (yyyy1<yyyy2) {return '<'}
+if (yyyy1>yyyy2) {return '>'}
+if (mm1<mm2) {return '<'}
+if (mm1>mm2) {return '>'}
+if (dd1<dd2) {return '<'}
+if (dd1>dd2) {return '>'}
+return '=';
+}
+
+function setDateEndTalonOld()
+{
+var d1=getEl('DATEONEVIZITINFO1').value;
+var d2=getEl('DATEONEVIZITINFO2').value;
+var d3=getEl('DATEONEVIZITINFO3').value;
+var m1=getEl('codemed1').value;
+var m2=getEl('codemed2').value;
+var m3=getEl('codemed3').value;
+getEl('dend').value=d1;
+getEl('medend').value=m1;
+if (cmpDateStr(d2,getEl('dend').value)=='>') {getEl('dend').value=d2;getEl('medend').value=m2};
+if (cmpDateStr(d3,getEl('dend').value)=='>') {getEl('dend').value=d3;getEl('medend').value=m3};
+}
+
+function setDateEndTalon()
+{
+document.getElementsByName('MEDICENDINFO')[0].value=document.getElementsByName('MEDICONEVIZITINFO1')[0].value;
+document.getElementsByName('DATEENDINFO')[0].value=document.getElementsByName('DATEONEVIZITINFO1')[0].value;
+
+for (i=2;i<20;i++)
+{
+
+if  (document.getElementsByName('DATEONEVIZITINFO'+i)[0]!=null) 
+    {
+    if (cmpDateStr(document.getElementsByName('DATEONEVIZITINFO'+i)[0].value,
+               document.getElementsByName('DATEENDINFO')[0].value)=='>') 
+               { 
+                document.getElementsByName('MEDICENDINFO')[0].value=document.getElementsByName('MEDICONEVIZITINFO'+i.toString())[0].value;
+                document.getElementsByName('DATEENDINFO')[0].value=document.getElementsByName('DATEONEVIZITINFO'+i.toString())[0].value;
+               }
+    }
+}
+}
+
+
+
+// Установка спика выбора для select из массива
+// idSelect - id select
+// o - массив вида [{text:'Four',value:'0'},{text:'Five',value:'1'},{text:'Six',value:'2'}];
+// v - текущее значение переменной 
+function setSelectOptions(idSelect,o,v){
+var s = document.getElementById(idSelect);
+o.forEach(function(element,key) {
+    try{
+    if (element.value==v) 
+       {s.options[key] = new Option(element.text,element.value,true,true)}
+    else
+       {s.options[key] = new Option(element.text,element.value)};
+    } catch (e) {alert(e)}
+});
+}

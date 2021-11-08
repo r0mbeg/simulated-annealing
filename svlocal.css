@@ -1,0 +1,49 @@
+.modalwin [id^=b] {font-size:20px !important}
+.PRINTCART2 {font-size:8px !important}
+.PRINTCART2 .delimiter {font-size:12px}
+.EDITIEMK3 {color:red}
+
+#listdayonemedic {}
+@media print {
+.NOPRINT {display:none}
+}
+
+
+.SHOW_ALL_FIODR {color:red}
+
+.CLASSAPPENDNEWNOMER {background-color:red}
+.CLASSAPPENDNEWNOMER2 {background-color:blue}
+
+
+#msgstandartinfo {color:red;font-size:xx-large}
+#rowbuttonlisttalon {min-width:110px}
+
+/* дополнительный стилевой класс кнопок на планшете */
+.TCGI_BUTTONSHOW {font-size:30px;height:100px}
+/* стилевой класс ФИО */
+.TCGI_BUTTONSHOW_FIO {font-size:20px}
+/* стилевой класс услуг */
+.TCGI_BUTTONSHOW_OPER {font-size:20px}
+/* стилевой класс приглашаемого номера */
+.TCGI_BUTTONSHOW_NOMERINFO {font-size:20px;text-align:center}
+/* стилевой класс заголовка */
+.TCGI_BUTTONSHOW_TITLE {font-size:20px;text-align:right}
+/* стилевой класс наименования (расшифровки 1 поля queue.dba ) */
+.TCGI_BUTTONSHOW_NAMEMED {font-size:20px;text-align:center}
+/* стилевой класс номера,приглашаемого с этого планшета */
+.TCGI_BUTTONSHOW_RECEIVENOMERINFO {font-size:30px;text-align:center;color:red}
+
+.NARROWELEMENT {font-family:'PT Sans Narrow'}
+/*body,button,input,select,label {font-family:'PT Sans Narrow'}*/
+
+._USER_STATNOENDTALONINFOCLIENT {font-size:20px;text-align:right ! important;}
+
+#tableallmedic77 th {font-size:30px}
+input:focus {background: #f4fdad;}
+select:focus {background: #f4fdad;}
+button:focus {background: #f4fdad;}
+
+.SHOWINFODIAG {font-size:30px ! important}
+.SELECTID {font-size:30px ! important}
+
+#fs_nr1[data-view-max="Y"] {position:fixed;top:10vh;left:10vw;height:70vh !important;width:80vw !important;background-color:white}
