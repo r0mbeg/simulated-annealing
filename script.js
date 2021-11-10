@@ -179,7 +179,12 @@ function simulatedAnnealingMethod(crawlPath, startTime, endTime) {
     console.log("Подбираем оптимальную последовательность в промежутке от " +
     displayTime(startTime) + " до " + displayTime(endTime));
 
-    crawlPath[0] = [0, 1, 2];
+    crawlPath[0] = [];
+    for (let i = 0; i < adjacencyMatrix.length; i++) {
+        crawlPath[0][i] = 3*i;
+    }
+    
+    
     
     crawlPath[0] = shufflePath(crawlPath[0], startTime, endTime);
     
@@ -283,12 +288,13 @@ function simulatedAnnealingMethod(crawlPath, startTime, endTime) {
 
 
 
-        
+        let strRes = "";
         for (let i = 0; i < docCrawlPath.length; i++) {
             console.log(doctors[i] + " - " + displayTime(timetable[i][crawlPath[res][i]]));
+            strRes += doctors[i] + " - " + displayTime(timetable[i][crawlPath[res][i]]) + "\n";
         }
 
-        
+        alert(strRes);
 
 
 
@@ -360,16 +366,20 @@ let doctors = [];
 
 //задание расстояний между кабинетами 
 //с помощью матрицы смежности
-let adjacencyMatrix = [[0, 1, 1],
-                       [1, 0, 1], 
-                       [1, 1, 0]];
+let adjacencyMatrix = [[0, 3, 4, 1, 1],
+                       [3, 0, 1, 3, 1], 
+                       [4, 1, 0, 1, 1],
+                       [1, 3, 1, 0, 1],
+                       [1, 1, 1, 1, 0]];
 
+
+console.log(adjacencyMatrix);
 
 //последовательность обхода врачей
 let crawlPath = [];
 
 startTime = new Date(2021, 10, 8, 11, 0);
-endTime = new Date(2021, 10, 8, 14, 0);
+endTime = new Date(2021, 10, 8, 17, 0);
 
 
 function test() {
