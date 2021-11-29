@@ -294,20 +294,19 @@ function simulatedAnnealingMethod(crawlPath, startTime, endTime) {
             strRes += doctors[i] + " - " + displayTime(timetable[i][crawlPath[res][i]]) + "\n";
         }
 
-        alert(strRes);
+        //alert(strRes);
+        //раскрасим все кнопки в цвет по умолчанию 
+        for (let i = 0; i < buttons.length; i ++) {
+            for (let j = 0; j < buttons[i].length; j ++) {
+                buttons[i][j].style.background = "";
+            }
+        }
 
-
-
-       
+        //выделим цветом выбранные номерки
+        for (let i = 0; i < docCrawlPath.length; i++) {
+            buttons[i][crawlPath[res][i]].style.background = "red";//"#F4FDAD";
+        }    
         
-        //console.log("Время первого посещения:\n" + 
-        //timetable[minIndexArray(crawlPath[res])][crawlPath[res][minIndexArray(crawlPath[res])]]);
-
-        //console.log("Время последнего посещения:\n" + 
-        //timetable[maxIndexArray(crawlPath[res])][crawlPath[res][maxIndexArray(crawlPath[res])]]);
-        
-        
-
     } else {
         console.log("Подобрать оптимальную последовательность невозможно!");
     }
@@ -320,23 +319,11 @@ function simulatedAnnealingMethod(crawlPath, startTime, endTime) {
 
 
 //задание расписания врачей
-
-
-/*
-//массив из 5 врачей
-let timetable = new Array(5);
-for (let i = 0; i < timetable.length; i ++) {
-    //у каждого врача 40 номерков с 8 до 17:45
-    timetable[i] = new Array(40);
-    for (let j = 0; j < timetable[i].length; j++) {
-        timetable[i][j] = new Date(2021, 9, 18, 8, j * 15);
-    }   
-}*/
-
 //считываем все элементы fieldset
 let fieldsets = document.querySelectorAll('fieldset');
 //console.log(fieldset);
-let buttons = [];
+let buttons = [];//двумерный массив кнопок i-номер набора кнопок (номер врача) 
+//j - номер собственно кнопки
 //console.log(fieldset[2].length);
 //for (let i = 1; i < )
 
@@ -378,12 +365,21 @@ console.log(adjacencyMatrix);
 //последовательность обхода врачей
 let crawlPath = [];
 
-startTime = new Date(2021, 10, 8, 11, 0);
-endTime = new Date(2021, 10, 8, 17, 0);
+
 
 
 function test() {
-    simulatedAnnealingMethod(crawlPath, startTime, endTime);    
+    timeStartAttribute = document.getElementById("timeStart").getAttribute("value").split(":");
+    timeEndAttribute = document.getElementById("timeEnd").getAttribute("value").split(":");
+
+    timeStart = new Date(2021, 10, 8, timeStartAttribute[0], timeStartAttribute[1]);
+    timeEnd = new Date(2021, 10, 8, timeEndAttribute[0], timeEndAttribute[1]);
+
+    //simulatedAnnealingMethod(crawlPath, timeStart, timeEnd);
+    
+    console.log(timeStartAttribute);
+    console.log(timeEndAttribute);
+    
 }
 
 
