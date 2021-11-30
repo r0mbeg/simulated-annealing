@@ -372,27 +372,15 @@ function test() {
     timeStartObj = document.getElementById("timeStart");
     timeEndObj = document.getElementById("timeEnd");
 
-    //timeStartAttribute =
-    //timeEndAttribute = 
+    timeStartAttribute = timeStartObj.value.split(":");
+    timeEndAttribute = timeEndObj.value.split(":");
 
-    timeStartObj.addEventListener("input", function() {
-        timeStartAttribute = timeStartObj.value; 
-    }, false);
+    timeStart = new Date(2021, 10, 8, timeStartAttribute[0], timeStartAttribute[1]);
+    timeEnd = new Date(2021, 10, 8, timeEndAttribute[0], timeEndAttribute[1]);
 
-    timeEndObj.addEventListener("input", function() {
-        timeEndAttribute = timeEndObj.value; 
-    }, false);
-
-    //timeStartAttribute = document.getElementById("timeStart").getAttribute("value").split(":");
-    //timeEndAttribute = document.getElementById("timeEnd").getAttribute("value").split(":");
-
-    //timeStart = new Date(2021, 10, 8, timeStartAttribute.innerText.split(":")[0], timeStartAttribute.innerText.split(":")[1]);
-    //timeEnd = new Date(2021, 10, 8, timeEndAttribute.innerText.split(":")[0], timeEndAttribute.innerText.split(":")[1]);
-
-    //simulatedAnnealingMethod(crawlPath, timeStart, timeEnd);
+    simulatedAnnealingMethod(crawlPath, timeStart, timeEnd);
     
-    console.log(timeStartAttribute);
-    console.log(timeEndAttribute);
+    
     
 }
 
