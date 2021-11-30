@@ -369,11 +369,25 @@ let crawlPath = [];
 
 
 function test() {
-    timeStartAttribute = document.getElementById("timeStart").getAttribute("value").split(":");
-    timeEndAttribute = document.getElementById("timeEnd").getAttribute("value").split(":");
+    timeStartObj = document.getElementById("timeStart");
+    timeEndObj = document.getElementById("timeEnd");
 
-    timeStart = new Date(2021, 10, 8, timeStartAttribute[0], timeStartAttribute[1]);
-    timeEnd = new Date(2021, 10, 8, timeEndAttribute[0], timeEndAttribute[1]);
+    //timeStartAttribute =
+    //timeEndAttribute = 
+
+    timeStartObj.addEventListener("input", function() {
+        timeStartAttribute = timeStartObj.value; 
+    }, false);
+
+    timeEndObj.addEventListener("input", function() {
+        timeEndAttribute = timeEndObj.value; 
+    }, false);
+
+    //timeStartAttribute = document.getElementById("timeStart").getAttribute("value").split(":");
+    //timeEndAttribute = document.getElementById("timeEnd").getAttribute("value").split(":");
+
+    //timeStart = new Date(2021, 10, 8, timeStartAttribute.innerText.split(":")[0], timeStartAttribute.innerText.split(":")[1]);
+    //timeEnd = new Date(2021, 10, 8, timeEndAttribute.innerText.split(":")[0], timeEndAttribute.innerText.split(":")[1]);
 
     //simulatedAnnealingMethod(crawlPath, timeStart, timeEnd);
     
