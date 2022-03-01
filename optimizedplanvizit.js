@@ -98,6 +98,7 @@ function changeOneRandom(crawlPath, startTime, endTime) {
     let tempCrawlPath = crawlPath.slice();
     //номер врача, у которого будем менять время
     let x = getRandomInt(timetable.length);
+    
     //количество миллисекунд в минуте
     let msMinutes = 1000 * 60;
     let diff = 0;
@@ -162,9 +163,11 @@ function changeOneRandom(crawlPath, startTime, endTime) {
 
 function shufflePath(array, startTime, endTime) {
     tempArray = array.slice();
+    
     for (let i = 0; i < array.length * 2; i ++) {
         tempArray = changeOneRandom(tempArray, startTime, endTime);
     }
+    
     return tempArray;
 
 }
@@ -186,11 +189,13 @@ function simulatedAnnealingMethod(crawlPath, startTime, endTime) {
     
     
     
+    
     crawlPath[0] = shufflePath(crawlPath[0], startTime, endTime);
     
     //продолжительности посещений
     let pathTime = [];
     pathTime[0] = travelTime(crawlPath[0]);
+    
     //длины путей между врачами
     let pathLength = [];
     pathLength[0] = travelLength(crawlPath[0], adjacencyMatrix);
@@ -320,15 +325,24 @@ function simulatedAnnealingMethod(crawlPath, startTime, endTime) {
 
 //задание расписания врачей
 //считываем все элементы fieldset
+
+
+
+
 let fieldsets = document.querySelectorAll('fieldset');
-//console.log(fieldset);
+
+
+
+
 let buttons = [];//двумерный массив кнопок i-номер набора кнопок (номер врача) 
 //j - номер собственно кнопки
-//console.log(fieldset[2].length);
+
 //for (let i = 1; i < )
 
-for (let i = 3; i < fieldsets.length; i ++) {
-    buttons[i - 3] = fieldsets[i].querySelectorAll('button.buttonsmall');
+
+
+for (let i = 4; i < fieldsets.length; i ++) {
+    buttons[i - 4] = fieldsets[i].querySelectorAll('button.buttonsmall');
     
 }
 //console.log(buttons.length);
@@ -353,14 +367,15 @@ let doctors = [];
 
 //задание расстояний между кабинетами 
 //с помощью матрицы смежности
-let adjacencyMatrix = [[0, 3, 4, 1, 1],
-                       [3, 0, 1, 3, 1], 
-                       [4, 1, 0, 1, 1],
-                       [1, 3, 1, 0, 1],
-                       [1, 1, 1, 1, 0]];
+let adjacencyMatrix = [[0, 3, 4, 1, 1, 1],
+                       [3, 0, 1, 3, 1, 2], 
+                       [4, 1, 0, 1, 1, 3],
+                       [1, 3, 1, 0, 1, 4],
+                       [1, 1, 1, 1, 0, 5],
+                       [1, 2, 3, 4, 5, 0]];
 
 
-console.log(adjacencyMatrix);
+//console.log(adjacencyMatrix);
 
 //последовательность обхода врачей
 let crawlPath = [];
@@ -368,22 +383,23 @@ let crawlPath = [];
 
 
 
-function test() {
-    timeStartObj = document.getElementById("timeStart");
-    timeEndObj = document.getElementById("timeEnd");
+function getOptimizedPlanVizit() {
+    //считывание окна времени для составления опт. последовательности
+    //закомментировано, так как выбора времени нет - поставлено окно с 6 утра до 23 вечера
 
-    timeStartAttribute = timeStartObj.value.split(":");
-    timeEndAttribute = timeEndObj.value.split(":");
-
-    timeStart = new Date(2021, 10, 8, timeStartAttribute[0], timeStartAttribute[1]);
-    timeEnd = new Date(2021, 10, 8, timeEndAttribute[0], timeEndAttribute[1]);
-    console.log(timeStartAttribute[0], timeStartAttribute[1]);
+    //timeStartObj = document.getElementById("timeStart");
+    //timeEndObj = document.getElementById("timeEnd");
+    //timeStartAttribute = timeStartObj.value.split(":");
+    //timeEndAttribute = timeEndObj.value.split(":");
+    //timeStart = new Date(2021, 1, 25, timeStartAttribute[0], timeStartAttribute[1]);
+    //timeEnd = new Date(2021, 1, 25, timeEndAttribute[0], timeEndAttribute[1]);
+   
+    timeStart = new Date(2021, 1, 25, 6, 0);
+    timeEnd = new Date(2021, 1, 25, 23, 0);
+    
     
 
-    simulatedAnnealingMethod(crawlPath, timeStart, timeEnd);
-    
-    
-    
+    //simulatedAnnealingMethod(crawlPath, timeStart, timeEnd);
 }
 
 
