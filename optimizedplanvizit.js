@@ -331,7 +331,7 @@ function simulatedAnnealingMethod(crawlPath, startTime, endTime) {
 
 let fieldsets = document.querySelectorAll('fieldset');
 
-
+console.log(fieldsets);
 
 
 let buttons = [];//двумерный массив кнопок i-номер набора кнопок (номер врача) 
