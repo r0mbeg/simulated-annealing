@@ -4,6 +4,14 @@ function getRandomInt(max) {
     return Math.floor(Math.random() * max);
 }
 
+function sleep(milliseconds) {
+    const date = Date.now();
+    let currentDate = null;
+    do {
+      currentDate = Date.now();
+    } while (currentDate - date < milliseconds);
+  }
+
 function minIndexArray(array) {
     let min = array[0];
     let minIndex = 0;
@@ -206,14 +214,17 @@ let adjacencyMatrix = [[0, 3, 4, 1, 1, 1, 4],
 
 
 
-
-
-
-
+window.addEventListener("load",function() {
+    if (sessionStorage.getItem('funcStart') == 1) {
+        getOptimizedPlanVizit();
+    }
+});
 
 
 function getOptimizedPlanVizit() {
 
+    sessionStorage.setItem('funcStart', 1);
+    
     let fieldsets = document.querySelectorAll('fieldset');
 
     //двумерный массив кнопок,
@@ -225,6 +236,9 @@ function getOptimizedPlanVizit() {
         buttons[i - 3] = fieldsets[i].querySelectorAll('button.buttonsmall');
     }
     
+
+
+
     //массив расписания врачей - достаём из кнопок времена (например, 8:00:00)
     var timetable = [];
     for (let i = 0; i < buttons.length; i ++) {
@@ -250,7 +264,7 @@ function getOptimizedPlanVizit() {
     }   
 
    
-   
+    
 
 
     var doctors = [];
@@ -258,7 +272,7 @@ function getOptimizedPlanVizit() {
 		    doctors[i - 3] = fieldsets[i].querySelector('legend').innerHTML.trim();
     }
     
-    console.log(timetable);
+    
    
 
     //считывание окна времени для составления опт. последовательности
@@ -275,8 +289,38 @@ function getOptimizedPlanVizit() {
     endTime = new Date(Number(dateStr[2]), Number(dateStr[1] - 1), Number(dateStr[0]), 23);
 
 
-    
-    //последовательность обхода врачей
+
+    //если количество элементов в хранилище сессии равно количеству врачей
+    //то окрашиваем номерки
+    if (sessionStorage.length > adjacencyMatrix.length) {
+        let selectedButtons = [];
+        selectedButtons = fieldsets[2].querySelectorAll('button.buttonsmall');
+
+        let selectedDoctors = [];
+        for (let i = 0; i < selectedButtons.length; i++) {
+            tempDoc = selectedButtons[i].innerHTML.split(" ");
+            selectedDoctors[i] = tempDoc[0] + " " + tempDoc[1] + " " + tempDoc[2];
+        }
+        
+        //если какой-то из врачей уже выбран, то его номерок выделяться не будет
+        for (let i = 0; i < doctors.length; i ++) {
+            let flag = false;
+            for (let j = 0; j < selectedDoctors.length; j++) {
+                if (doctors[i] == selectedDoctors[j]) {
+                    flag = true;
+                }
+            }
+            if (flag == false) {
+                buttons[i][sessionStorage.getItem("resPath_" + i)].style.background = "red";
+            }
+            
+        }
+        
+    } 
+    //если последовательность ещё не была составлена 
+    //(т.е. sessionStorage пуста и нужно вычислять оптимальную последовательность)
+    else {
+        //последовательность обхода врачей
     let crawlPath = [];
 
     console.log("Finding the optimal sequence in the interval from " +
@@ -416,13 +460,19 @@ function getOptimizedPlanVizit() {
 
         //выделим цветом выбранные номерки
         for (let i = 0; i < docCrawlPath.length; i++) {
-            buttons[i][crawlPath[res][i]].style.background = "red";//"#F4FDAD";
-            
+            buttons[i][crawlPath[res][i]].style.background = "red";      
         }    
-        
+
+        for (let i = 0; i < docCrawlPath.length; i++) {
+            sessionStorage.setItem("resPath_" + i, crawlPath[res][i]);
+        }       
     } else {
         console.log("It is impossible to choose the optimal sequence!");
     }
+    }
+
+    
+    
 }
 
 
