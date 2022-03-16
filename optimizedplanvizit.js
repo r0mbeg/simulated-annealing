@@ -204,9 +204,6 @@ let originalAdjacencyMatrix = [[0, 3, 4, 1, 1, 1, 5],
 
 //import {originalAdjacencyMatrix} from './optimizedplanvizit_const.mjs';
 
-let adjacencyMatrix = originalAdjacencyMatrix.slice();
-
-
 
 window.addEventListener("load",function() {
     if (sessionStorage.getItem('funcStart') == 1) {
@@ -220,7 +217,7 @@ function clearOptimizedPlanVizit() {
 }
 
 function selectCheckedDoctorsInMatrix(matrix, checkboxes) {
-    let resMatrix = matrix;
+    let resMatrix = matrix.slice();
     //удаление строк
     for (let i = matrix.length - 1; i >= 0; i --) {
         if (!checkboxes[i].checked) {
@@ -235,8 +232,6 @@ function selectCheckedDoctorsInMatrix(matrix, checkboxes) {
             }
         }
     }
-
-
     return resMatrix;
 }
 
@@ -277,7 +272,6 @@ function getOptimizedPlanVizit() {
         }
     }   
 
-
     let doctors = [];
 	    for (let i = 3; i < fieldsets.length; i ++) {
 		    doctors[i - 3] = fieldsets[i].querySelector('legend').innerHTML.trim();
@@ -304,14 +298,8 @@ function getOptimizedPlanVizit() {
         }
     }
     
-
-    
-    
-   
-    
    let adjacencyMatrix = selectCheckedDoctorsInMatrix(originalAdjacencyMatrix, checkboxes);
-   console.log(adjacencyMatrix);
-
+   
     //считывание окна времени для составления опт. последовательности
     //закомментировано, так как выбора времени нет - поставлено окно с 6 утра до 23 вечера
     timeStartObj = document.getElementById("TIMEBEGINMULTIVIZIT");
@@ -343,24 +331,33 @@ function getOptimizedPlanVizit() {
 
         let selectedDoctors = [];
         for (let i = 0; i < selectedButtons.length; i++) {
-            tempDoc = selectedButtons[i].innerHTML.split(" ");
-            selectedDoctors[i] = tempDoc[0] + " " + tempDoc[1] + " " + tempDoc[2];
-        }
-        
-        //если какой-то из врачей уже выбран, то его номерок выделяться не будет
-        for (let i = 0; i < doctors.length; i ++) {
-            let flag = false;
-            for (let j = 0; j < selectedDoctors.length; j++) {
-                if (doctors[i] == selectedDoctors[j]) {
-                    flag = true;
-                }
-            }
-            if (flag == false) {
-                buttons[i][sessionStorage.getItem("resPath_" + i)].style.background = "red";
+            if (checkboxes[i].checked) {
+                tempDoc = selectedButtons[i].innerHTML.split(" ");
+                selectedDoctors[i] = tempDoc[0] + " " + tempDoc[1] + " " + tempDoc[2];
             }
             
         }
-        
+        console.log(sessionStorage);
+        //если какой-то из врачей уже выбран, то его номерок выделяться не будет
+        for (let i = 0; i < doctors.length; i ++) {
+            let flag = false;
+            if (checkboxes[i].checked) {
+                for (let j = 0; j < selectedDoctors.length; j++) {
+                    if (doctors[i] == selectedDoctors[j]) { 
+                        flag = true;
+                    }
+                }//исправить!!!
+                if (flag == false) {
+                    for (let j = 0; j < checkedButtons; j++) {
+                        if (i == checkedButtons[j]) {
+                            buttons[i][sessionStorage.getItem("resPath_" + i)].style.background = "red";
+                        }
+                    }
+                    
+
+                }
+            }
+        }
     } 
     //если последовательность ещё не была составлена 
     //(т.е. sessionStorage пуста и нужно вычислять оптимальную последовательность)
@@ -379,14 +376,14 @@ function getOptimizedPlanVizit() {
     
     
     
-    crawlPath[0] = shufflePath(crawlPath[0], startTime, endTime, timetable);
+    crawlPath[0] = shufflePath(crawlPath[0], startTime, endTime, checkedTimetable);
 
     
     //продолжительности посещений
     let pathTime = [];
     
     
-    pathTime[0] = travelTime(crawlPath[0], timetable);
+    pathTime[0] = travelTime(crawlPath[0], checkedTimetable);
     //длины путей между врачами
     let pathLength = [];
     pathLength[0] = travelLength(crawlPath[0], adjacencyMatrix);
@@ -440,13 +437,13 @@ function getOptimizedPlanVizit() {
 
     while (temperature >= 0.01) {
         
-        crawlPath[i] = changeOneRandom(crawlPath[i - 1], startTime, endTime, timetable);
+        crawlPath[i] = changeOneRandom(crawlPath[i - 1], startTime, endTime, checkedTimetable);
             if (crawlPath[i] == null) {
                 //console.log("Подобрать оптимальную последовательность невозможно!");
                 break;
             } else {
                 //console.log("Последовательность обхода на итерации №" + i + ": " + crawlPath[i]);
-                pathTime[i] = travelTime(crawlPath[i], timetable);
+                pathTime[i] = travelTime(crawlPath[i], checkedTimetable);
                 pathLength[i] = travelLength(crawlPath[i], adjacencyMatrix);
                 difficulty[i] = pathTime[i] + pathLength[i] * difficultyFactor;
 
@@ -491,8 +488,8 @@ function getOptimizedPlanVizit() {
         let strRes = "";
         for (let i = 0; i < docCrawlPath.length; i++) {
 
-            console.log(doctors[i] + " - " + displayTime(timetable[i][crawlPath[res][i]]));
-            strRes += doctors[i] + " - " + displayTime(timetable[i][crawlPath[res][i]]) + "\n";
+            console.log(checkedDoctors[i] + " - " + displayTime(checkedTimetable[i][crawlPath[res][i]]));
+            strRes += checkedDoctors[i] + " - " + displayTime(checkedTimetable[i][crawlPath[res][i]]) + "\n";
         }
 
         //alert(strRes);
@@ -502,15 +499,29 @@ function getOptimizedPlanVizit() {
                 buttons[i][j].style.background = "";
             }
         }
+        
+
+
 
         //выделим цветом выбранные номерки
-        for (let i = 0; i < docCrawlPath.length; i++) {
-            buttons[i][crawlPath[res][i]].style.background = "red";      
+        for (let i = 0; i < adjacencyMatrix.length; i++) {
+                checkedButtons[i][crawlPath[res][i]].style.background = "red";  
         }    
 
-        for (let i = 0; i < docCrawlPath.length; i++) {
-            sessionStorage.setItem("resPath_" + i, crawlPath[res][i]);
+
+        //исправить!
+        
+        for (let i = 0; i < originalAdjacencyMatrix.length; i++) {
+            for (let j = 0; j < checkedDoctorsNumbers.length; j++) {
+                if (i == checkedDoctorsNumbers[j]) {
+                    sessionStorage.setItem("resPath_" + i, crawlPath[res][checkedDoctorsNumbers[j]]);
+                }
+            }
+                
+                
+                       
         }       
+        console.log(sessionStorage);
     } else {
         console.log("It is impossible to choose the optimal sequence!");
     }
