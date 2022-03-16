@@ -191,26 +191,20 @@ function shufflePath(array, startTime, endTime, timetable) {
 function probability(deltaLengthPath, temperature) {
     return (100 * Math.exp(- (deltaLengthPath / (10000000 * temperature))));
 }
-
-
-
-
-//задание расписания врачей
-//считываем все элементы fieldset
-
-
-
-
 //задание расстояний между кабинетами 
 //с помощью матрицы смежности
-let adjacencyMatrix = [[0, 3, 4, 1, 1, 1, 4],
-                       [3, 0, 1, 3, 1, 2, 3], 
-                       [4, 1, 0, 1, 1, 3, 2],
-                       [1, 3, 1, 0, 1, 4, 1],
-                       [1, 1, 1, 1, 0, 5, 1],
-                       [1, 2, 3, 4, 5, 0, 2],
-                       [4, 3, 2, 1, 1, 2, 0]];
 
+let originalAdjacencyMatrix = [[0, 3, 4, 1, 1, 1, 5],
+                               [3, 0, 1, 3, 1, 2, 4], 
+                               [4, 1, 0, 1, 1, 3, 3],
+                               [1, 3, 1, 0, 1, 4, 2],
+                               [1, 1, 1, 1, 0, 5, 1],
+                               [1, 2, 3, 4, 5, 0, 1],
+                               [5, 4, 3, 2, 1, 1, 0]];
+
+//import {originalAdjacencyMatrix} from './optimizedplanvizit_const.mjs';
+
+let adjacencyMatrix = originalAdjacencyMatrix.slice();
 
 
 
@@ -219,6 +213,33 @@ window.addEventListener("load",function() {
         getOptimizedPlanVizit();
     }
 });
+
+function clearOptimizedPlanVizit() {
+    sessionStorage.clear();
+    window.location.reload();
+}
+
+function selectCheckedDoctorsInMatrix(matrix, checkboxes) {
+    let resMatrix = matrix;
+    //удаление строк
+    for (let i = matrix.length - 1; i >= 0; i --) {
+        if (!checkboxes[i].checked) {
+            resMatrix.splice(i, 1);
+        }
+    }
+    //удаление столбцов
+    for (let i = resMatrix.length - 1; i >= 0; i --) {
+        for (let j = resMatrix[0].length - 1; j >= 0; j --) {
+            if (!checkboxes[j].checked) {
+                resMatrix[i].splice(j, 1);
+            }
+        }
+    }
+
+
+    return resMatrix;
+}
+
 
 
 function getOptimizedPlanVizit() {
@@ -236,20 +257,13 @@ function getOptimizedPlanVizit() {
         buttons[i - 3] = fieldsets[i].querySelectorAll('button.buttonsmall');
     }
     
-
-
-
     //массив расписания врачей - достаём из кнопок времена (например, 8:00:00)
     var timetable = [];
     for (let i = 0; i < buttons.length; i ++) {
         timetable[i] = [];
     }
 
-    
-
-    let dateStr = document.getElementById('DATEMULTIVIZIT').value.split("/");
-    
-    
+    let dateStr = document.getElementById('DATEMULTIVIZIT').value.split("/");    
     
     for (let i = 0; i < buttons.length; i++) {
         for (let j = 0; j < buttons[i].length; j++) {
@@ -263,30 +277,61 @@ function getOptimizedPlanVizit() {
         }
     }   
 
-   
-    
 
-
-    var doctors = [];
+    let doctors = [];
 	    for (let i = 3; i < fieldsets.length; i ++) {
 		    doctors[i - 3] = fieldsets[i].querySelector('legend').innerHTML.trim();
     }
+
+    let checkboxes = [];
+    
+    //считываем отмеченных чекбоксами врачей
+    //и заполняем массивы checked_*:
+
+    let checkedDoctorsNumbers = [];
+    let checkedDoctors = [];
+    let checkedTimetable = [];
+    let checkedButtons = [];
+
+    for (let i = 3; i < fieldsets.length; i ++) {
+        checkboxes[i - 3] = document.getElementById("USEMED" + (i - 2));
+        if (checkboxes[i - 3].checked) {
+            checkedDoctorsNumbers.push(i - 3);
+            checkedDoctors.push(doctors[i - 3]);
+            checkedTimetable.push(timetable[i - 3]);
+            checkedButtons.push(buttons[i - 3]);
+
+        }
+    }
+    
+
     
     
    
+    
+   let adjacencyMatrix = selectCheckedDoctorsInMatrix(originalAdjacencyMatrix, checkboxes);
+   console.log(adjacencyMatrix);
 
     //считывание окна времени для составления опт. последовательности
     //закомментировано, так как выбора времени нет - поставлено окно с 6 утра до 23 вечера
-
-    //timeStartObj = document.getElementById("timeStart");
-    //timeEndObj = document.getElementById("timeEnd");
-    //timeStartAttribute = timeStartObj.value.split(":");
-    //timeEndAttribute = timeEndObj.value.split(":");
-    //timeStart = new Date(2021, 1, 25, timeStartAttribute[0], timeStartAttribute[1]);
-    //timeEnd = new Date(2021, 1, 25, timeEndAttribute[0], timeEndAttribute[1]);
+    timeStartObj = document.getElementById("TIMEBEGINMULTIVIZIT");
+    timeEndObj = document.getElementById("TIMEENDMULTIVIZIT");
+    timeStartAttribute = timeStartObj.value.split(":");
+    timeEndAttribute = timeEndObj.value.split(":");
    
-    startTime = new Date(Number(dateStr[2]), Number(dateStr[1] - 1), Number(dateStr[0]), 8);
-    endTime = new Date(Number(dateStr[2]), Number(dateStr[1] - 1), Number(dateStr[0]), 23);
+    startTime = new Date(Number(dateStr[2]),
+                         Number(dateStr[1] - 1),
+                         Number(dateStr[0]), 
+                         timeStartAttribute[0], 
+                         timeStartAttribute[1],
+                         timeStartAttribute[2]);
+
+    endTime = new Date(Number(dateStr[2]), 
+                       Number(dateStr[1] - 1), 
+                       Number(dateStr[0]), 
+                       timeEndAttribute[0], 
+                       timeEndAttribute[1], 
+                       timeEndAttribute[2]);
 
 
 
