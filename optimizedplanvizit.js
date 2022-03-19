@@ -119,15 +119,9 @@ function changeOneRandom(crawlPath, startTime, endTime, timetable) {
     
     //пробежим в цикле все номерки врача №x и проверим, какие из них подходят
     for (let i = 0; i < timetable[x].length; i++) {
-        
         flag = true;
         for (let j = 0; j < crawlPath.length; j++) {
-            
-            
             diff = (Math.abs(Math.floor(  (timetable[x][i] - timetable[j][crawlPath[j]]))) / msMinutes);
-            
-    
-        
             //если промежуток между посещениями меньше 30мин
             //то такое время не добавляем в avaluable
             if (diff < 30) {
@@ -135,7 +129,6 @@ function changeOneRandom(crawlPath, startTime, endTime, timetable) {
                 //console.log("Время " + timetable[x][i] + " не подходит!");
                 break;
             }
-
         }
         if (flag == true) {
             avaluable.push(i);
@@ -163,13 +156,11 @@ function changeOneRandom(crawlPath, startTime, endTime, timetable) {
             //":" + (new Date(timetable[x][avaluable[i]]).getMinutes()) + " ПОДХОДИТ!");
         }
     }
-
     if (avaluable.length > 0) {
     //среди свободных номерков выберем случайным образом один
     let y = getRandomInt(avaluable.length);
     tempCrawlPath[x] = avaluable[y];
     return tempCrawlPath;
-    
     } else if (avaluable.length == 0) {
         //console.log("Подобрать оптимальную последовательность невозможно!");
         return null;
@@ -178,14 +169,11 @@ function changeOneRandom(crawlPath, startTime, endTime, timetable) {
 }
 
 function shufflePath(array, startTime, endTime, timetable) {
-    
     tempArray = array.slice();
     for (let i = 0; i < array.length * 2; i ++) {
         tempArray = changeOneRandom(tempArray, startTime, endTime, timetable);
     }
-    
     return tempArray;
-
 }
 
 function probability(deltaLengthPath, temperature) {
@@ -193,14 +181,21 @@ function probability(deltaLengthPath, temperature) {
 }
 //задание расстояний между кабинетами 
 //с помощью матрицы смежности
-
+/*
 let originalAdjacencyMatrix = [[0, 3, 4, 1, 1, 1, 5],
                                [3, 0, 1, 3, 1, 2, 4], 
                                [4, 1, 0, 1, 1, 3, 3],
                                [1, 3, 1, 0, 1, 4, 2],
                                [1, 1, 1, 1, 0, 5, 1],
                                [1, 2, 3, 4, 5, 0, 1],
-                               [5, 4, 3, 2, 1, 1, 0]];
+                               [5, 4, 3, 2, 1, 1, 0]];*/
+let originalAdjacencyMatrix = [[0, 3, 4, 1, 1, 1],
+                               [3, 0, 1, 3, 1, 2], 
+                               [4, 1, 0, 1, 1, 3],
+                               [1, 3, 1, 0, 1, 4],
+                               [1, 1, 1, 1, 0, 5],
+                               [1, 2, 3, 4, 5, 0]];
+                               
 
 //import {originalAdjacencyMatrix} from './optimizedplanvizit_const.mjs';
 
@@ -238,11 +233,8 @@ function selectCheckedDoctorsInMatrix(matrix, checkboxes) {
 
 
 function getOptimizedPlanVizit() {
-
     sessionStorage.setItem('funcStart', 1);
-    
     let fieldsets = document.querySelectorAll('fieldset');
-
     //двумерный массив кнопок,
     //где i-номер набора кнопок (номер врача) 
     //j - номер собственно кнопки
@@ -251,15 +243,12 @@ function getOptimizedPlanVizit() {
     for (let i = 3; i < fieldsets.length; i ++) {
         buttons[i - 3] = fieldsets[i].querySelectorAll('button.buttonsmall');
     }
-    
     //массив расписания врачей - достаём из кнопок времена (например, 8:00:00)
     var timetable = [];
     for (let i = 0; i < buttons.length; i ++) {
         timetable[i] = [];
     }
-
     let dateStr = document.getElementById('DATEMULTIVIZIT').value.split("/");    
-    
     for (let i = 0; i < buttons.length; i++) {
         for (let j = 0; j < buttons[i].length; j++) {
             let currTime = buttons[i][j].innerHTML.split(":");
@@ -274,8 +263,10 @@ function getOptimizedPlanVizit() {
 
     let doctors = [];
 	    for (let i = 3; i < fieldsets.length; i ++) {
-		    doctors[i - 3] = fieldsets[i].querySelector('legend').innerHTML.trim();
+		    //doctors[i - 3] = fieldsets[i].querySelector('legend').innerHTML.trim();
+            doctors[i - 3] = fieldsets[i].querySelector('legend').innerText.trim();
     }
+    console.log(doctors);
 
     let checkboxes = [];
     
@@ -297,11 +288,10 @@ function getOptimizedPlanVizit() {
 
         }
     }
-    
+
    let adjacencyMatrix = selectCheckedDoctorsInMatrix(originalAdjacencyMatrix, checkboxes);
    
     //считывание окна времени для составления опт. последовательности
-    //закомментировано, так как выбора времени нет - поставлено окно с 6 утра до 23 вечера
     timeStartObj = document.getElementById("TIMEBEGINMULTIVIZIT");
     timeEndObj = document.getElementById("TIMEENDMULTIVIZIT");
     timeStartAttribute = timeStartObj.value.split(":");
@@ -328,33 +318,40 @@ function getOptimizedPlanVizit() {
     if (sessionStorage.length > adjacencyMatrix.length) {
         let selectedButtons = [];
         selectedButtons = fieldsets[2].querySelectorAll('button.buttonsmall');
-
         let selectedDoctors = [];
+        //если врач выбран, то из массива doctors добавляем его в массивы selectedDoctors?????
         for (let i = 0; i < selectedButtons.length; i++) {
             if (checkboxes[i].checked) {
-                tempDoc = selectedButtons[i].innerHTML.split(" ");
+                let tempDoc = selectedButtons[i].innerHTML.split(" ");
+                
                 selectedDoctors[i] = tempDoc[0] + " " + tempDoc[1] + " " + tempDoc[2];
+                console.log(selectedDoctors[i]);
             }
             
         }
         console.log(sessionStorage);
+        
+        
+        //doctors и selectedDoctors имеют разный формат!
+
         //если какой-то из врачей уже выбран, то его номерок выделяться не будет
         for (let i = 0; i < doctors.length; i ++) {
             let flag = false;
             if (checkboxes[i].checked) {
+                console.log("checkboxes[" + i + "] is checked!");
                 for (let j = 0; j < selectedDoctors.length; j++) {
                     if (doctors[i] == selectedDoctors[j]) { 
                         flag = true;
                     }
                 }//исправить!!!
                 if (flag == false) {
+                    console.log("The doctor number " + i + " was not selected");
                     for (let j = 0; j < checkedButtons; j++) {
                         if (i == checkedButtons[j]) {
+                            console.log("Doctor number " + i + " is checked!");
                             buttons[i][sessionStorage.getItem("resPath_" + i)].style.background = "red";
                         }
                     }
-                    
-
                 }
             }
         }
@@ -362,6 +359,7 @@ function getOptimizedPlanVizit() {
     //если последовательность ещё не была составлена 
     //(т.е. sessionStorage пуста и нужно вычислять оптимальную последовательность)
     else {
+        
         //последовательность обхода врачей
     let crawlPath = [];
 
