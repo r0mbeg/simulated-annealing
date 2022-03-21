@@ -181,21 +181,21 @@ function probability(deltaLengthPath, temperature) {
 }
 //задание расстояний между кабинетами 
 //с помощью матрицы смежности
-/*
+
 let originalAdjacencyMatrix = [[0, 3, 4, 1, 1, 1, 5],
                                [3, 0, 1, 3, 1, 2, 4], 
                                [4, 1, 0, 1, 1, 3, 3],
                                [1, 3, 1, 0, 1, 4, 2],
                                [1, 1, 1, 1, 0, 5, 1],
                                [1, 2, 3, 4, 5, 0, 1],
-                               [5, 4, 3, 2, 1, 1, 0]];*/
-let originalAdjacencyMatrix = [[0, 3, 4, 1, 1, 1],
+                               [5, 4, 3, 2, 1, 1, 0]];
+/*let originalAdjacencyMatrix = [[0, 3, 4, 1, 1, 1],
                                [3, 0, 1, 3, 1, 2], 
                                [4, 1, 0, 1, 1, 3],
                                [1, 3, 1, 0, 1, 4],
                                [1, 1, 1, 1, 0, 5],
                                [1, 2, 3, 4, 5, 0]];
-                               
+                               */
 
 //import {originalAdjacencyMatrix} from './optimizedplanvizit_const.mjs';
 
@@ -325,10 +325,11 @@ function getOptimizedPlanVizit() {
                 let tempDoc = selectedButtons[i].innerHTML.split(" ");
                 
                 selectedDoctors[i] = tempDoc[0] + " " + tempDoc[1] + " " + tempDoc[2];
-                console.log(selectedDoctors[i]);
+                console.log(selectedDoctors[i]);        
             }
             
         }
+        
         console.log(sessionStorage);
         
         
@@ -338,7 +339,6 @@ function getOptimizedPlanVizit() {
         for (let i = 0; i < doctors.length; i ++) {
             let flag = false;
             if (checkboxes[i].checked) {
-                console.log("checkboxes[" + i + "] is checked!");
                 for (let j = 0; j < selectedDoctors.length; j++) {
                     if (doctors[i] == selectedDoctors[j]) { 
                         flag = true;
@@ -346,8 +346,8 @@ function getOptimizedPlanVizit() {
                 }//исправить!!!
                 if (flag == false) {
                     console.log("The doctor number " + i + " was not selected");
-                    for (let j = 0; j < checkedButtons; j++) {
-                        if (i == checkedButtons[j]) {
+                    for (let j = 0; j < checkedDoctorsNumbers.length; j++) {
+                        if (i == checkedDoctorsNumbers[j]) {
                             console.log("Doctor number " + i + " is checked!");
                             buttons[i][sessionStorage.getItem("resPath_" + i)].style.background = "red";
                         }
@@ -507,13 +507,14 @@ function getOptimizedPlanVizit() {
         }    
 
 
-        //исправить!
+        
         
         for (let i = 0; i < originalAdjacencyMatrix.length; i++) {
             for (let j = 0; j < checkedDoctorsNumbers.length; j++) {
                 if (i == checkedDoctorsNumbers[j]) {
-                    sessionStorage.setItem("resPath_" + i, crawlPath[res][checkedDoctorsNumbers[j]]);
+                    sessionStorage.setItem("resPath_" + i, crawlPath[res][j]);
                 }
+
             }
                 
                 
