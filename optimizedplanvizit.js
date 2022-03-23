@@ -313,21 +313,19 @@ function getOptimizedPlanVizit() {
 
 
 
+    
+
     //если количество элементов в хранилище сессии равно количеству врачей
     //то окрашиваем номерки
     if (sessionStorage.length > adjacencyMatrix.length) {
         let selectedButtons = [];
         selectedButtons = fieldsets[2].querySelectorAll('button.buttonsmall');
+        console.log(selectedButtons);
         let selectedDoctors = [];
         //если врач выбран, то из массива doctors добавляем его в массивы selectedDoctors?????
-        for (let i = 0; i < selectedButtons.length; i++) {
-            if (checkboxes[i].checked) {
-                let tempDoc = selectedButtons[i].innerHTML.split(" ");
-                
-                selectedDoctors[i] = tempDoc[0] + " " + tempDoc[1] + " " + tempDoc[2];
-                console.log(selectedDoctors[i]);        
-            }
-            
+        for (let i = 0; i < selectedButtons.length; i++) {             
+            let tempDoc = selectedButtons[i].innerHTML.split(" ");
+            selectedDoctors[i] = tempDoc[0] + " " + tempDoc[1] + " " + tempDoc[2];     
         }
         
         console.log(sessionStorage);
@@ -345,10 +343,10 @@ function getOptimizedPlanVizit() {
                     }
                 }//исправить!!!
                 if (flag == false) {
-                    console.log("The doctor number " + i + " was not selected");
+                    //console.log("The doctor number " + i + " was not selected");
                     for (let j = 0; j < checkedDoctorsNumbers.length; j++) {
                         if (i == checkedDoctorsNumbers[j]) {
-                            console.log("Doctor number " + i + " is checked!");
+                            //console.log("Doctor number " + i + " is checked!");
                             buttons[i][sessionStorage.getItem("resPath_" + i)].style.background = "red";
                         }
                     }
