@@ -234,7 +234,20 @@ function selectCheckedDoctorsInMatrix(matrix, checkboxes) {
 
 function getOptimizedPlanVizit() {
     sessionStorage.setItem('funcStart', 1);
+
+
+
     let fieldsets = document.querySelectorAll('fieldset');
+    
+    for (let i = 1; i < fieldsets.length; i++) {
+        if (fieldsets[i].querySelector('legend').innerText.trim() == 'Сообщение об ошибке') {
+           fieldsets.splice(i);
+        }
+    }  
+    
+
+    
+
     //двумерный массив кнопок,
     //где i-номер набора кнопок (номер врача) 
     //j - номер собственно кнопки
