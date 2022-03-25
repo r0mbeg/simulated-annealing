@@ -52,7 +52,10 @@ function travelLength(crawlPath, adjacencyMatrix) {
         return null;
     } else {
         let sum = 0;
+        
         let tempCrawlPath = crawlPath.slice();
+        
+
         //массив последователности обхода, формирующийся на основе crawlPath
         let crawlSequnce = [];
     
@@ -104,7 +107,9 @@ function changeOneRandom(crawlPath, startTime, endTime, timetable) {
         //console.log("Подобрать оптимальную последовательность невозможно!");
         return crawlPath;
     } else {
+     
     let tempCrawlPath = crawlPath.slice();
+    
     //номер врача, у которого будем менять время
     let x = getRandomInt(timetable.length);
     
@@ -169,7 +174,9 @@ function changeOneRandom(crawlPath, startTime, endTime, timetable) {
 }
 
 function shufflePath(array, startTime, endTime, timetable) {
+      
     tempArray = array.slice();
+    
     for (let i = 0; i < array.length * 2; i ++) {
         tempArray = changeOneRandom(tempArray, startTime, endTime, timetable);
     }
@@ -212,7 +219,9 @@ function clearOptimizedPlanVizit() {
 }
 
 function selectCheckedDoctorsInMatrix(matrix, checkboxes) {
+    
     let resMatrix = matrix.slice();
+    
     //удаление строк
     for (let i = matrix.length - 1; i >= 0; i --) {
         if (!checkboxes[i].checked) {
@@ -232,20 +241,34 @@ function selectCheckedDoctorsInMatrix(matrix, checkboxes) {
 
 
 
+
+
 function getOptimizedPlanVizit() {
+
     sessionStorage.setItem('funcStart', 1);
 
-
-
-    let fieldsets = document.querySelectorAll('fieldset');
+    let allFieldsets = document.querySelectorAll('fieldset');
     
-    for (let i = 1; i < fieldsets.length; i++) {
-        if (fieldsets[i].querySelector('legend').innerText.trim() == 'Сообщение об ошибке') {
-           fieldsets.splice(i);
+    
+    let fieldsets = [];
+
+    for (let i = 0; i < allFieldsets.length; i++) {
+        if (allFieldsets[i].querySelector('legend')) {
+            if (allFieldsets[i].querySelector('legend').querySelector('input')) {
+                fieldsets.push(allFieldsets[i]);
+            }
         }
-    }  
+    }
+   
     
 
+
+
+    
+
+     
+
+    
     
 
     //двумерный массив кнопок,
@@ -253,8 +276,8 @@ function getOptimizedPlanVizit() {
     //j - номер собственно кнопки
     let buttons = [];
     //заполняем массив кнопок
-    for (let i = 3; i < fieldsets.length; i ++) {
-        buttons[i - 3] = fieldsets[i].querySelectorAll('button.buttonsmall');
+    for (let i = 0; i < fieldsets.length; i ++) {
+        buttons[i] = fieldsets[i].querySelectorAll('button.buttonsmall');
     }
     //массив расписания врачей - достаём из кнопок времена (например, 8:00:00)
     var timetable = [];
@@ -275,11 +298,11 @@ function getOptimizedPlanVizit() {
     }   
 
     let doctors = [];
-	    for (let i = 3; i < fieldsets.length; i ++) {
+	    for (let i = 0; i < fieldsets.length; i ++) {
 		    //doctors[i - 3] = fieldsets[i].querySelector('legend').innerHTML.trim();
-            doctors[i - 3] = fieldsets[i].querySelector('legend').innerText.trim();
+            doctors[i] = fieldsets[i].querySelector('legend').innerText.trim();
     }
-    console.log(doctors);
+    //console.log(doctors);
 
     let checkboxes = [];
     
@@ -291,13 +314,13 @@ function getOptimizedPlanVizit() {
     let checkedTimetable = [];
     let checkedButtons = [];
 
-    for (let i = 3; i < fieldsets.length; i ++) {
-        checkboxes[i - 3] = document.getElementById("USEMED" + (i - 2));
-        if (checkboxes[i - 3].checked) {
-            checkedDoctorsNumbers.push(i - 3);
-            checkedDoctors.push(doctors[i - 3]);
-            checkedTimetable.push(timetable[i - 3]);
-            checkedButtons.push(buttons[i - 3]);
+    for (let i = 0; i < fieldsets.length; i ++) {
+        checkboxes[i] = document.getElementById("USEMED" + (i + 1));
+        if (checkboxes[i].checked) {
+            checkedDoctorsNumbers.push(i);
+            checkedDoctors.push(doctors[i]);
+            checkedTimetable.push(timetable[i]);
+            checkedButtons.push(buttons[i]);
 
         }
     }
@@ -332,8 +355,25 @@ function getOptimizedPlanVizit() {
     //то окрашиваем номерки
     if (sessionStorage.length > adjacencyMatrix.length) {
         let selectedButtons = [];
-        selectedButtons = fieldsets[2].querySelectorAll('button.buttonsmall');
+       
+        
+        for (let i = 0; i < allFieldsets.length; i++) {
+            if (allFieldsets[i].querySelector('legend')) {
+                //если у fieldset'a найден input, значит, предыдущий fieldset - 
+                //- fieldset с выбранными номерками
+                if (allFieldsets[i].querySelector('legend').querySelector('input')) {
+                    selectedButtons = allFieldsets[i - 1].querySelectorAll('button.buttonsmall');
+                    break;
+                }
+            }
+        }
+
+
+
+
+        
         console.log(selectedButtons);
+
         let selectedDoctors = [];
         //если врач выбран, то из массива doctors добавляем его в массивы selectedDoctors?????
         for (let i = 0; i < selectedButtons.length; i++) {             
@@ -369,9 +409,13 @@ function getOptimizedPlanVizit() {
     } 
     //если последовательность ещё не была составлена 
     //(т.е. sessionStorage пуста и нужно вычислять оптимальную последовательность)
+    
     else {
-        
-        //последовательность обхода врачей
+    let attemptCounter = 0;
+    let success = false;
+
+    while (attemptCounter <= 5 && !success) {
+    //последовательность обхода врачей
     let crawlPath = [];
 
     console.log("Finding the optimal sequence in the interval from " +
@@ -380,165 +424,156 @@ function getOptimizedPlanVizit() {
     crawlPath[0] = [];
     for (let i = 0; i < adjacencyMatrix.length; i++) {
         crawlPath[0][i] = 3*i;
-    }
-   
-    
-    
-    
-    crawlPath[0] = shufflePath(crawlPath[0], startTime, endTime, checkedTimetable);
-
-    
-    //продолжительности посещений
-    let pathTime = [];
-    
-    
-    pathTime[0] = travelTime(crawlPath[0], checkedTimetable);
-    //длины путей между врачами
-    let pathLength = [];
-    pathLength[0] = travelLength(crawlPath[0], adjacencyMatrix);
-    //сложности путей
-    let difficulty = [];
-    //коэффициент сложности пути
-    //может быть увеличен если пациент, например, маломобилен
-    let difficultyFactor = 700000;
-    difficulty[0] = pathTime[0] + pathLength[0] * difficultyFactor;
-    
-
-    let time = new Date(pathTime[0]);
-    
-
-    if (crawlPath[0] != null) {
-        console.log("Initial traversal sequence " + crawlPath[0] +
-        " takes time " + displayTime(time) +
-        " and has length " + travelLength(crawlPath[0], adjacencyMatrix));
-    }
-    
-    
-    
-    
-
-
-    //начальная температура
-    let temperature = 100;
-
-    //коэффициент снижения температуры
-    let alpha = 0.999;
-
-    //сложность пути - функция от времени и
-    //расстояния между врачами
-
-
-    //вероятность для выбора пути
-    let p = 0;
-
-    let i = 1;
-
-    let testP = Math.random() * 100;
-
-    //номер итогового пути
-    let res = 0;
-    
-    
-    
-    
-    //разница между сложностями
-    let deltaDifficulty = 0;
-
-    while (temperature >= 0.01) {
+    }    
         
-        crawlPath[i] = changeOneRandom(crawlPath[i - 1], startTime, endTime, checkedTimetable);
-            if (crawlPath[i] == null) {
-                //console.log("Подобрать оптимальную последовательность невозможно!");
-                break;
-            } else {
-                //console.log("Последовательность обхода на итерации №" + i + ": " + crawlPath[i]);
-                pathTime[i] = travelTime(crawlPath[i], checkedTimetable);
-                pathLength[i] = travelLength(crawlPath[i], adjacencyMatrix);
-                difficulty[i] = pathTime[i] + pathLength[i] * difficultyFactor;
-
-                deltaDifficulty = difficulty[i] - difficulty[i - 1];
-
-                if (deltaDifficulty <= 0) {
-                    //console.log("Путь на итерации " + i + " удачный \n\n");
-                    res = i;
-                    i++;
+        
+        crawlPath[0] = shufflePath(crawlPath[0], startTime, endTime, checkedTimetable);
+        
+        //продолжительности посещений
+        let pathTime = [];
+              
+        pathTime[0] = travelTime(crawlPath[0], checkedTimetable);
+        //длины путей между врачами
+        let pathLength = [];
+        pathLength[0] = travelLength(crawlPath[0], adjacencyMatrix);
+        //сложности путей
+        let difficulty = [];
+        //коэффициент сложности пути
+        //может быть увеличен если пациент, например, маломобилен
+        let difficultyFactor = 700000;
+        difficulty[0] = pathTime[0] + pathLength[0] * difficultyFactor;
+        
+    
+        let time = new Date(pathTime[0]);
+        
+    
+        if (crawlPath[0] != null) {
+            console.log("Initial traversal sequence " + crawlPath[0] +
+            " takes time " + displayTime(time) +
+            " and has length " + travelLength(crawlPath[0], adjacencyMatrix));
+        }
+        
+        
+        
+        
+    
+    
+        //начальная температура
+        let temperature = 100;
+    
+        //коэффициент снижения температуры
+        let alpha = 0.999;
+    
+        //сложность пути - функция от времени и
+        //расстояния между врачами
+    
+    
+        //вероятность для выбора пути
+        let p = 0;
+    
+        let i = 1;
+    
+        let testP = Math.random() * 100;
+    
+        //номер итогового пути
+        let res = 0;
+        
+        
+        
+        
+        //разница между сложностями
+        let deltaDifficulty = 0;
+    
+        while (temperature >= 0.01) {
+            
+            crawlPath[i] = changeOneRandom(crawlPath[i - 1], startTime, endTime, checkedTimetable);
+                if (crawlPath[i] == null) {
+                    //console.log("Подобрать оптимальную последовательность невозможно!");
+                    break;
                 } else {
-                    p = probability(deltaDifficulty, temperature);
-                    //console.log("p = exp(-" + deltaPathTime + "/(10000000 * " + temperature + ")) = " +p);
-                    testP = Math.random() * 100;
+                    //console.log("Последовательность обхода на итерации №" + i + ": " + crawlPath[i]);
+                    pathTime[i] = travelTime(crawlPath[i], checkedTimetable);
+                    pathLength[i] = travelLength(crawlPath[i], adjacencyMatrix);
+                    difficulty[i] = pathTime[i] + pathLength[i] * difficultyFactor;
     
-                    if (p > testP) {
-                        //console.log (p + " > " + testP + " - Путь на итерации " + i + " принят \n\n");
+                    deltaDifficulty = difficulty[i] - difficulty[i - 1];
+    
+                    if (deltaDifficulty <= 0) {
+                        //console.log("Путь на итерации " + i + " удачный \n\n");
                         res = i;
-                        i++;   
+                        i++;
                     } else {
-                        //console.log (p + " <= " + testP + " - Путь на итерации " + i + " не принят \n\n");
-                    } 
-             
+                        p = probability(deltaDifficulty, temperature);
+                        //console.log("p = exp(-" + deltaPathTime + "/(10000000 * " + temperature + ")) = " +p);
+                        testP = Math.random() * 100;
+        
+                        if (p > testP) {
+                            //console.log (p + " > " + testP + " - Путь на итерации " + i + " принят \n\n");
+                            res = i;
+                            i++;   
+                        } else {
+                            //console.log (p + " <= " + testP + " - Путь на итерации " + i + " не принят \n\n");
+                        } 
+                 
+                } 
+    
             } 
-
-        } 
-        temperature *= alpha;    
-    }
-    
-    
-    if (travelLength(crawlPath[res], adjacencyMatrix) != null) {
-        console.log("The optimal sequence of traversal in the interval from " +
-        displayTime(startTime) + " to " + displayTime(endTime) + " - " + 
-        crawlPath[res] + " takes " + displayTime(new Date(pathTime[res])) +
-        ", achieved on iteration " + res + " and has length " + travelLength(crawlPath[res], adjacencyMatrix));
-
-        console.log("Crawl sequence:");
-
-        docCrawlPath = crawlPath[res].slice();
-
-
-
-        let strRes = "";
-        for (let i = 0; i < docCrawlPath.length; i++) {
-
-            console.log(checkedDoctors[i] + " - " + displayTime(checkedTimetable[i][crawlPath[res][i]]));
-            strRes += checkedDoctors[i] + " - " + displayTime(checkedTimetable[i][crawlPath[res][i]]) + "\n";
+            temperature *= alpha;    
         }
+        
+        
+        if (travelLength(crawlPath[res], adjacencyMatrix) != null) {
+            success = true;
+            console.log("The optimal sequence of traversal in the interval from " +
+            displayTime(startTime) + " to " + displayTime(endTime) + " - " + 
+            crawlPath[res] + " takes " + displayTime(new Date(pathTime[res])) +
+            ", achieved on iteration " + res + " and has length " + travelLength(crawlPath[res], adjacencyMatrix));
+    
+            console.log("Crawl sequence:");
+            
+            docCrawlPath = crawlPath[res].slice();
+            
 
-        //alert(strRes);
-        //раскрасим все кнопки в цвет по умолчанию 
-        for (let i = 0; i < buttons.length; i ++) {
-            for (let j = 0; j < buttons[i].length; j ++) {
-                buttons[i][j].style.background = "";
+
+            let strRes = "";
+            for (let i = 0; i < docCrawlPath.length; i++) {
+                console.log(checkedDoctors[i] + " - " + displayTime(checkedTimetable[i][crawlPath[res][i]]));
+                strRes += checkedDoctors[i] + " - " + displayTime(checkedTimetable[i][crawlPath[res][i]]) + "\n";
             }
-        }
-        
-
-
-
-        //выделим цветом выбранные номерки
-        for (let i = 0; i < adjacencyMatrix.length; i++) {
-                checkedButtons[i][crawlPath[res][i]].style.background = "red";  
-        }    
-
-
-        
-        
-        for (let i = 0; i < originalAdjacencyMatrix.length; i++) {
-            for (let j = 0; j < checkedDoctorsNumbers.length; j++) {
-                if (i == checkedDoctorsNumbers[j]) {
-                    sessionStorage.setItem("resPath_" + i, crawlPath[res][j]);
+    
+            //alert(strRes);
+            //раскрасим все кнопки в цвет по умолчанию 
+            for (let i = 0; i < buttons.length; i ++) {
+                for (let j = 0; j < buttons[i].length; j ++) {
+                    buttons[i][j].style.background = "";
                 }
-
             }
-                
-                
-                       
-        }       
-        console.log(sessionStorage);
-    } else {
-        console.log("It is impossible to choose the optimal sequence!");
-    }
-    }
+            
+            //выделим цветом выбранные номерки
+            for (let i = 0; i < adjacencyMatrix.length; i++) {
+                    checkedButtons[i][crawlPath[res][i]].style.background = "red";  
+            }    
+    
+            for (let i = 0; i < originalAdjacencyMatrix.length; i++) {
+                for (let j = 0; j < checkedDoctorsNumbers.length; j++) {
+                    if (i == checkedDoctorsNumbers[j]) {
+                        sessionStorage.setItem("resPath_" + i, crawlPath[res][j]);
+                    }
+                }           
+            }       
+            console.log(sessionStorage);
+        } else {
+            console.log("It is impossible to choose the optimal sequence!");
+            attemptCounter++;
+            if (attemptCounter < 5) {
+                console.log("Trying again...");
+            } else if (attemptCounter == 5) {
+                alert("It is impossible to choose the optimal sequence!");
+            }
 
-    
-    
+        }
+    }
+    }
 }
 
 
