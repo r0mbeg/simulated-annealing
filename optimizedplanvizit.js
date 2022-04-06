@@ -189,22 +189,30 @@ function probability(deltaLengthPath, temperature) {
 //задание расстояний между кабинетами 
 //с помощью матрицы смежности
 
-let originalAdjacencyMatrix = [[0, 3, 4, 1, 1, 1, 5],
-                               [3, 0, 1, 3, 1, 2, 4], 
-                               [4, 1, 0, 1, 1, 3, 3],
-                               [1, 3, 1, 0, 1, 4, 2],
-                               [1, 1, 1, 1, 0, 5, 1],
-                               [1, 2, 3, 4, 5, 0, 1],
-                               [5, 4, 3, 2, 1, 1, 0]];
-/*let originalAdjacencyMatrix = [[0, 3, 4, 1, 1, 1],
-                               [3, 0, 1, 3, 1, 2], 
-                               [4, 1, 0, 1, 1, 3],
-                               [1, 3, 1, 0, 1, 4],
-                               [1, 1, 1, 1, 0, 5],
-                               [1, 2, 3, 4, 5, 0]];
-                               */
+var const_script = document.createElement("script");
+const_script.src="/js/optimizedplanvizit_const.js";
+document.head.appendChild(const_script);
+    
+setTimeout("getAdjacencyMatrix()", 1000);
+   
+let originalAdjacencyMatrix = JSON.parse(sessionStorage.getItem("originalAdjacencyMatrix"));
 
-//import {originalAdjacencyMatrix} from './optimizedplanvizit_const.mjs';
+/*
+function getAdjacencyMatrix() {
+    let originalAdjacencyMatrix = [[0, 3, 4, 1, 1, 1, 5],
+                                   [3, 0, 1, 3, 1, 2, 4], 
+                                   [4, 1, 0, 1, 1, 3, 3],
+                                   [1, 3, 1, 0, 1, 4, 2],
+                                   [1, 1, 1, 1, 0, 5, 1],
+                                   [1, 2, 3, 4, 5, 0, 1],
+                                   [5, 4, 3, 2, 1, 1, 0]];
+    sessionStorage.setItem("originalAdjacencyMatrix", JSON.stringify(originalAdjacencyMatrix));
+}
+*/
+
+
+
+                            
 
 
 window.addEventListener("load",function() {
@@ -244,7 +252,6 @@ function selectCheckedDoctorsInMatrix(matrix, checkboxes) {
 
 
 function getOptimizedPlanVizit() {
-
     sessionStorage.setItem('funcStart', 1);
 
     let allFieldsets = document.querySelectorAll('fieldset');
@@ -260,17 +267,6 @@ function getOptimizedPlanVizit() {
         }
     }
    
-    
-
-
-
-    
-
-     
-
-    
-    
-
     //двумерный массив кнопок,
     //где i-номер набора кнопок (номер врача) 
     //j - номер собственно кнопки
@@ -381,7 +377,7 @@ function getOptimizedPlanVizit() {
             selectedDoctors[i] = tempDoc[0] + " " + tempDoc[1] + " " + tempDoc[2];     
         }
         
-        console.log(sessionStorage);
+        
         
         
         //doctors и selectedDoctors имеют разный формат!
@@ -561,7 +557,7 @@ function getOptimizedPlanVizit() {
                     }
                 }           
             }       
-            console.log(sessionStorage);
+            
         } else {
             console.log("It is impossible to choose the optimal sequence!");
             attemptCounter++;
