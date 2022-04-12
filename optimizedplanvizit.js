@@ -30,7 +30,11 @@ function displayTime(date) {
     if (minutes == 0) {
         return hours + ":00";
     } else {
-        return hours + ":" + minutes;
+        if (minutes < 10) {
+            return hours + ":0" + minutes;
+        } else {
+            return hours + ":" + minutes;
+        }
     }
 }
 
@@ -55,7 +59,6 @@ function travelLength(crawlPath, adjacencyMatrix) {
         
         let tempCrawlPath = crawlPath.slice();
         
-
         //массив последователности обхода, формирующийся на основе crawlPath
         let crawlSequnce = [];
     
@@ -63,9 +66,7 @@ function travelLength(crawlPath, adjacencyMatrix) {
             crawlSequnce[i] =  minIndexArray(tempCrawlPath);
             //console.log("Минимум на итерации " + i + " равен элементу с индексом " + crawlSequnce[i]);
             //console.log(tempCrawlPath);
-            tempCrawlPath[crawlSequnce[i]] = 9999;
-            
-            
+            tempCrawlPath[crawlSequnce[i]] = 9999;  
         }
         
         for (let i = 0; i < crawlPath.length - 1; i++) {
@@ -74,7 +75,6 @@ function travelLength(crawlPath, adjacencyMatrix) {
         //console.log("Длина пути [" + crawlSequnce + "] равна " + sum);
         return sum;
     }
-    
 }
 
 function travelTime(crawlPath, timetable) {
@@ -94,9 +94,8 @@ function travelTime(crawlPath, timetable) {
     }
     //отнимаем 3 часа в миллисекундах из-за часового пояса
     return (max - min - 10800000);
+    }
 }
-}
-
 
 //функция, меняющая у случайного врача время
 //при этом учитывается промежуток времени, 
@@ -141,7 +140,6 @@ function changeOneRandom(crawlPath, startTime, endTime, timetable) {
         }
     }
     
-
     //если таких номерков нет, то запишем в массив тот номерок, который уже был выбран
     if (avaluable.length == 0) {
         avaluable.push(x);
@@ -173,6 +171,10 @@ function changeOneRandom(crawlPath, startTime, endTime, timetable) {
 }
 }
 
+
+
+
+
 function shufflePath(array, startTime, endTime, timetable) {
       
     tempArray = array.slice();
@@ -186,26 +188,6 @@ function shufflePath(array, startTime, endTime, timetable) {
 function probability(deltaLengthPath, temperature) {
     return (100 * Math.exp(- (deltaLengthPath / (10000000 * temperature))));
 }
-//задание расстояний между кабинетами 
-//с помощью матрицы смежности
-
-let originalAdjacencyMatrix = [[0, 3, 4, 1, 1, 1, 5],
-                               [3, 0, 1, 3, 1, 2, 4], 
-                               [4, 1, 0, 1, 1, 3, 3],
-                               [1, 3, 1, 0, 1, 4, 2],
-                               [1, 1, 1, 1, 0, 5, 1],
-                               [1, 2, 3, 4, 5, 0, 1],
-                               [5, 4, 3, 2, 1, 1, 0]];
-/*let originalAdjacencyMatrix = [[0, 3, 4, 1, 1, 1],
-                               [3, 0, 1, 3, 1, 2], 
-                               [4, 1, 0, 1, 1, 3],
-                               [1, 3, 1, 0, 1, 4],
-                               [1, 1, 1, 1, 0, 5],
-                               [1, 2, 3, 4, 5, 0]];
-                               */
-
-//import {originalAdjacencyMatrix} from './optimizedplanvizit_const.mjs';
-
 
 window.addEventListener("load",function() {
     if (sessionStorage.getItem('funcStart') == 1) {
@@ -219,9 +201,10 @@ function clearOptimizedPlanVizit() {
 }
 
 function selectCheckedDoctorsInMatrix(matrix, checkboxes) {
-    
+    console.log("slice!");
+    console.log(matrix);
     let resMatrix = matrix.slice();
-    
+    console.log("slice completed!");
     //удаление строк
     for (let i = matrix.length - 1; i >= 0; i --) {
         if (!checkboxes[i].checked) {
@@ -241,17 +224,33 @@ function selectCheckedDoctorsInMatrix(matrix, checkboxes) {
 
 
 
+/*function getAdjacencyMatrix() {
+    let originalAdjacencyMatrix = [[0, 3, 4, 1, 1, 1, 5],
+                                   [3, 0, 1, 3, 1, 2, 4], 
+                                   [4, 1, 0, 1, 1, 3, 3],
+                                   [1, 3, 1, 0, 1, 4, 2],
+                                   [1, 1, 1, 1, 0, 5, 1],
+                                   [1, 2, 3, 4, 5, 0, 1],
+                                   [5, 4, 3, 2, 1, 1, 0]];
+    sessionStorage.setItem("originalAdjacencyMatrix", JSON.stringify(originalAdjacencyMatrix));
+}
 
+*/
 
 function getOptimizedPlanVizit() {
+    var const_script = document.createElement("script");
+    const_script.src="/js/optimizedplanvizit_const.js";
+    document.head.appendChild(const_script);
+    getAdjacencyMatrix();
+    //setTimeout("getAdjacencyMatrix()", 1000);
+    var originalAdjacencyMatrix = JSON.parse(sessionStorage.getItem("originalAdjacencyMatrix"));
+    
+    
+
 
     sessionStorage.setItem('funcStart', 1);
-
     let allFieldsets = document.querySelectorAll('fieldset');
-    
-    
     let fieldsets = [];
-
     for (let i = 0; i < allFieldsets.length; i++) {
         if (allFieldsets[i].querySelector('legend')) {
             if (allFieldsets[i].querySelector('legend').querySelector('input')) {
@@ -259,18 +258,6 @@ function getOptimizedPlanVizit() {
             }
         }
     }
-   
-    
-
-
-
-    
-
-     
-
-    
-    
-
     //двумерный массив кнопок,
     //где i-номер набора кнопок (номер врача) 
     //j - номер собственно кнопки
@@ -325,8 +312,12 @@ function getOptimizedPlanVizit() {
         }
     }
 
-   let adjacencyMatrix = selectCheckedDoctorsInMatrix(originalAdjacencyMatrix, checkboxes);
+    
+
+    let adjacencyMatrix = selectCheckedDoctorsInMatrix(originalAdjacencyMatrix, checkboxes);
    
+    
+
     //считывание окна времени для составления опт. последовательности
     timeStartObj = document.getElementById("TIMEBEGINMULTIVIZIT");
     timeEndObj = document.getElementById("TIMEENDMULTIVIZIT");
@@ -347,10 +338,6 @@ function getOptimizedPlanVizit() {
                        timeEndAttribute[1], 
                        timeEndAttribute[2]);
 
-
-
-    
-
     //если количество элементов в хранилище сессии равно количеству врачей
     //то окрашиваем номерки
     if (sessionStorage.length > adjacencyMatrix.length) {
@@ -367,10 +354,6 @@ function getOptimizedPlanVizit() {
                 }
             }
         }
-
-
-
-
         
         console.log(selectedButtons);
 
@@ -380,12 +363,8 @@ function getOptimizedPlanVizit() {
             let tempDoc = selectedButtons[i].innerHTML.split(" ");
             selectedDoctors[i] = tempDoc[0] + " " + tempDoc[1] + " " + tempDoc[2];     
         }
-        
         console.log(sessionStorage);
-        
-        
         //doctors и selectedDoctors имеют разный формат!
-
         //если какой-то из врачей уже выбран, то его номерок выделяться не будет
         for (let i = 0; i < doctors.length; i ++) {
             let flag = false;
@@ -424,9 +403,7 @@ function getOptimizedPlanVizit() {
     crawlPath[0] = [];
     for (let i = 0; i < adjacencyMatrix.length; i++) {
         crawlPath[0][i] = 3*i;
-    }    
-        
-        
+    }     
         crawlPath[0] = shufflePath(crawlPath[0], startTime, endTime, checkedTimetable);
         
         //продолжительности посещений
@@ -443,21 +420,14 @@ function getOptimizedPlanVizit() {
         let difficultyFactor = 700000;
         difficulty[0] = pathTime[0] + pathLength[0] * difficultyFactor;
         
-    
         let time = new Date(pathTime[0]);
         
-    
         if (crawlPath[0] != null) {
             console.log("Initial traversal sequence " + crawlPath[0] +
             " takes time " + displayTime(time) +
             " and has length " + travelLength(crawlPath[0], adjacencyMatrix));
         }
         
-        
-        
-        
-    
-    
         //начальная температура
         let temperature = 100;
     
@@ -466,8 +436,6 @@ function getOptimizedPlanVizit() {
     
         //сложность пути - функция от времени и
         //расстояния между врачами
-    
-    
         //вероятность для выбора пути
         let p = 0;
     
@@ -477,9 +445,6 @@ function getOptimizedPlanVizit() {
     
         //номер итогового пути
         let res = 0;
-        
-        
-        
         
         //разница между сложностями
         let deltaDifficulty = 0;
@@ -530,6 +495,7 @@ function getOptimizedPlanVizit() {
             ", achieved on iteration " + res + " and has length " + travelLength(crawlPath[res], adjacencyMatrix));
     
             console.log("Crawl sequence:");
+            
             
             docCrawlPath = crawlPath[res].slice();
             
