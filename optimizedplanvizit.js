@@ -201,10 +201,7 @@ function clearOptimizedPlanVizit() {
 }
 
 function selectCheckedDoctorsInMatrix(matrix, checkboxes) {
-    console.log("slice!");
-    console.log(matrix);
     let resMatrix = matrix.slice();
-    console.log("slice completed!");
     //удаление строк
     for (let i = matrix.length - 1; i >= 0; i --) {
         if (!checkboxes[i].checked) {
@@ -237,16 +234,19 @@ function selectCheckedDoctorsInMatrix(matrix, checkboxes) {
 
 */
 
-function getOptimizedPlanVizit() {
-    var const_script = document.createElement("script");
+var const_script = document.createElement("script");
     const_script.src="/js/optimizedplanvizit_const.js";
     document.head.appendChild(const_script);
-    getAdjacencyMatrix();
-    //setTimeout("getAdjacencyMatrix()", 1000);
-    var originalAdjacencyMatrix = JSON.parse(sessionStorage.getItem("originalAdjacencyMatrix"));
-    
-    
+    var originalAdjacencyMatrix = [];
 
+    const_script.onload = function () {
+        getAdjacencyMatrix();
+        
+    }
+
+function getOptimizedPlanVizit() {
+    
+    originalAdjacencyMatrix = JSON.parse(sessionStorage.getItem("originalAdjacencyMatrix"));
 
     sessionStorage.setItem('funcStart', 1);
     let allFieldsets = document.querySelectorAll('fieldset');
@@ -286,7 +286,6 @@ function getOptimizedPlanVizit() {
 
     let doctors = [];
 	    for (let i = 0; i < fieldsets.length; i ++) {
-		    //doctors[i - 3] = fieldsets[i].querySelector('legend').innerHTML.trim();
             doctors[i] = fieldsets[i].querySelector('legend').innerText.trim();
     }
     //console.log(doctors);
@@ -355,7 +354,9 @@ function getOptimizedPlanVizit() {
             }
         }
         
-        console.log(selectedButtons);
+        
+        
+
 
         let selectedDoctors = [];
         //если врач выбран, то из массива doctors добавляем его в массивы selectedDoctors?????
@@ -363,7 +364,7 @@ function getOptimizedPlanVizit() {
             let tempDoc = selectedButtons[i].innerHTML.split(" ");
             selectedDoctors[i] = tempDoc[0] + " " + tempDoc[1] + " " + tempDoc[2];     
         }
-        console.log(sessionStorage);
+        
         //doctors и selectedDoctors имеют разный формат!
         //если какой-то из врачей уже выбран, то его номерок выделяться не будет
         for (let i = 0; i < doctors.length; i ++) {
