@@ -4,14 +4,6 @@ function getRandomInt(max) {
     return Math.floor(Math.random() * max);
 }
 
-function sleep(milliseconds) {
-    const date = Date.now();
-    let currentDate = null;
-    do {
-      currentDate = Date.now();
-    } while (currentDate - date < milliseconds);
-  }
-
 function minIndexArray(array) {
     let min = array[0];
     let minIndex = 0;
@@ -230,9 +222,8 @@ function selectCheckedDoctorsInMatrix(matrix, checkboxes) {
                                    [1, 2, 3, 4, 5, 0, 1],
                                    [5, 4, 3, 2, 1, 1, 0]];
     sessionStorage.setItem("originalAdjacencyMatrix", JSON.stringify(originalAdjacencyMatrix));
-}
-
-*/
+    return originalAdjacencyMatrix;
+}*/
 
 var const_script = document.createElement("script");
     const_script.src="/js/optimizedplanvizit_const.js";
@@ -240,13 +231,14 @@ var const_script = document.createElement("script");
     var originalAdjacencyMatrix = [];
 
     const_script.onload = function () {
-        getAdjacencyMatrix();
-        
+        getAdjacencyMatrix();  
     }
 
 function getOptimizedPlanVizit() {
     
     originalAdjacencyMatrix = JSON.parse(sessionStorage.getItem("originalAdjacencyMatrix"));
+
+    console.log(originalAdjacencyMatrix);
 
     sessionStorage.setItem('funcStart', 1);
     let allFieldsets = document.querySelectorAll('fieldset');
