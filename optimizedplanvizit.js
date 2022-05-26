@@ -340,9 +340,8 @@ function getOptimizedPlanVizit() {
     //если количество элементов в хранилище сессии равно количеству врачей
     //то окрашиваем номерки
     if (sessionStorage.length > adjacencyMatrix.length) {
+
         let selectedButtons = [];
-       
-        
         for (let i = 0; i < allFieldsets.length; i++) {
             if (allFieldsets[i].querySelector('legend')) {
                 //если у fieldset'a найден input, значит, предыдущий fieldset - 
@@ -354,11 +353,9 @@ function getOptimizedPlanVizit() {
             }
         }
         
-        
-        
-
-
         let selectedDoctors = [];
+
+
         //если врач выбран, то из массива doctors добавляем его в массивы selectedDoctors?????
         for (let i = 0; i < selectedButtons.length; i++) {             
             let tempDoc = selectedButtons[i].innerHTML.split(" ");
@@ -367,6 +364,8 @@ function getOptimizedPlanVizit() {
         
         //doctors и selectedDoctors имеют разный формат!
         //если какой-то из врачей уже выбран, то его номерок выделяться не будет
+
+
         for (let i = 0; i < doctors.length; i ++) {
             let flag = false;
             if (checkboxes[i].checked) {
@@ -374,8 +373,10 @@ function getOptimizedPlanVizit() {
                     if (doctors[i] == selectedDoctors[j]) { 
                         flag = true;
                     }
-                }//исправить!!!
-                if (flag == false) {
+                }
+                //исправить!!!
+                if (flag == false && checkedDoctorsNumbers.length > 1) {
+                    console.log(checkedDoctorsNumbers.length);
                     //console.log("The doctor number " + i + " was not selected");
                     for (let j = 0; j < checkedDoctorsNumbers.length; j++) {
                         if (i == checkedDoctorsNumbers[j]) {
