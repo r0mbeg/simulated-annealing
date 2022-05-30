@@ -234,6 +234,23 @@ var const_script = document.createElement("script");
         getAdjacencyMatrix();  
     }
 
+
+
+
+
+    var div_chart = document.createElement("div");
+            div_chart.setAttribute("id", "div_chart");
+            div_chart.style.width = "100px";
+            div_chart.style.height = "100px";
+            div_chart.style.background = "gray";
+            div_chart.style.color = "white";
+            div_chart.innerHTML = "Hello";
+
+
+
+
+
+
 function getOptimizedPlanVizit() {
     
     originalAdjacencyMatrix = JSON.parse(sessionStorage.getItem("originalAdjacencyMatrix"));
@@ -299,9 +316,9 @@ function getOptimizedPlanVizit() {
             checkedDoctors.push(doctors[i]);
             checkedTimetable.push(timetable[i]);
             checkedButtons.push(buttons[i]);
-
         }
     }
+
 
     
 
@@ -522,6 +539,16 @@ function getOptimizedPlanVizit() {
                 }           
             }       
             console.log(sessionStorage);
+
+            
+            document.body.appendChild(div_chart);
+
+            div_chart.innerHTML = res + " : " + travelLength(crawlPath[res], adjacencyMatrix);
+
+            
+
+
+
         } else {
             console.log("It is impossible to choose the optimal sequence!");
             attemptCounter++;
